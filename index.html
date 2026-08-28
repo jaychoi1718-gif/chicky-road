@@ -414,7 +414,14 @@ details[open] summary{color:var(--curb)}
    seed). Set it to your backend to go live.
    ══════════════════════════════════════════════════════════ */
 const CONFIG={
-  apiBase   : '',                              // e.g. 'https://api.kgame99.com'
+  /* ── Supabase (no backend needed) ──────────────────────────
+     Fill these two in and the leaderboard goes live.
+     Leave them empty to stay in DEMO mode with mock data.     */
+  sbUrl     : 'https://kcxzitxccxfwbeojdptn.supabase.co',
+  sbKey     : 'sb_publishable_N4r7o0h21OPP1SdWhZ6e4A__qjO_zNO',   // publishable key
+  perPlayerSeed: true,                         // true = each player gets their own road
+
+  apiBase   : '',                              // only for a real backend later
   groupUrl  : 'https://t.me/krgilersquad',
   claimUrl  : 'https://kgame99.com/register',
   baseLives : 3,
@@ -535,24 +542,83 @@ async function call(path,body){
   if(!r.ok) throw new Error(path+' → '+r.status);
   return r.json();
 }
+/* ── Supabase REST helpers ── */
+const SB={
+  on: !!(CONFIG.sbUrl&&CONFIG.sbKey),
+  head(extra){ return Object.assign({
+    apikey:CONFIG.sbKey, Authorization:'Bearer '+CONFIG.sbKey,
+    'Content-Type':'application/json'},extra||{}); },
+  async get(path){
+    const r=await fetch(CONFIG.sbUrl+'/rest/v1/'+path,{headers:this.head()});
+    if(!r.ok) throw new Error('GET '+path+' → '+r.status);
+    return r.json();
+  },
+  async insert(table,row){
+    const r=await fetch(CONFIG.sbUrl+'/rest/v1/'+table,{
+      method:'POST', headers:this.head({Prefer:'return=minimal'}),
+      body:JSON.stringify(row)});
+    if(r.status===409) return {duplicate:true};       // already played today
+    if(!r.ok) throw new Error('POST '+table+' → '+r.status);
+    return {ok:true};
+  }
+};
+function myDate(){                                   // today's date in UTC+8
+  const d=new Date(myNow());
+  return d.getUTCFullYear()+'-'+pad(d.getUTCMonth()+1)+'-'+pad(d.getUTCDate());
+}
+function tgId(){ return String((TG.user||{}).id||'guest-'+(localStorage.crGuest||
+  (localStorage.crGuest=Math.random().toString(36).slice(2,9)))); }
+function tgName(){ return (TG.user||{}).username||(TG.user||{}).first_name||'player'; }
+
 const API={
-  demo: !CONFIG.apiBase,
+  demo: !CONFIG.apiBase && !SB.on,
   /* GET player state: invite count, personal link, whether today's run is used */
   async state(){
-    if(this.demo) return {invited:S.invited,inviteLink:CONFIG.groupUrl+'?start=inv_A7K92',
+    if(CONFIG.apiBase) return call('/chicky/state');
+    if(SB.on){
+      const id=tgId();
+      const [board,today]=await Promise.all([
+        SB.get('cr_leaderboard?select=*&limit=50'),
+        SB.get('cr_today?select=tg_id&tg_id=eq.'+encodeURIComponent(id))
+      ]);
+      const rows=board.map(r=>({u:'@'+r.username,p:r.total,d:r.days,tg:r.tg_id}));
+      const mine=rows.findIndex(r=>r.tg===id);
+      return {
+        canPlay: today.length===0,
+        leaderboard: rows.slice(0,5),
+        myTotal: mine>-1?rows[mine].p:0,
+        myRank : mine>-1?mine+1:rows.length+1,
+        invited: 0,
+        inviteLink: CONFIG.groupUrl
+      };
+    }
+    return {invited:S.invited,inviteLink:CONFIG.groupUrl+'?start=inv_A7K92',
       canPlay:true,myTotal:S.myTotal,myRank:S.myRank,leaderboard:BOARD};
-    return call('/chicky/state');
   },
   /* START a run: server checks the daily quota and issues seed + token */
   async startRun(){
-    if(this.demo) return {seed:demoSeed(),runToken:'demo',
+    if(CONFIG.apiBase) return call('/chicky/start');
+    return {seed:demoSeed(),runToken:'local',
       lives:CONFIG.baseLives+livesOf(S.invited),invited:S.invited};
-    return call('/chicky/start');
   },
   /* SUBMIT input timings — server replays and returns the authoritative score */
   async submitRun(p){
-    if(this.demo) return {verified:true,score:p.claimedScore};
-    return call('/chicky/submit',p);
+    if(CONFIG.apiBase) return call('/chicky/submit',p);
+    if(SB.on){
+      const res=await SB.insert('cr_runs',{
+        tg_id:tgId(), username:tgName(), played_on:myDate(),
+        score:p.claimedScore, inputs:p.inputs        // kept for later auditing
+      });
+      if(res.duplicate) return {verified:false,duplicate:true};
+      API.state().then(st=>{
+        if(!st) return;
+        S.myTotal=st.myTotal; S.myRank=st.myRank;
+        BOARD.length=0; st.leaderboard.forEach(r=>BOARD.push(r));
+        renderBoard();
+      }).catch(()=>{});
+      return {verified:true,score:p.claimedScore};
+    }
+    return {verified:true,score:p.claimedScore};
   }
 };
 
@@ -578,7 +644,19 @@ function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;
    value below is a DEMO fallback only — a client-clock seed lets
    a player set their phone forward and scout tomorrow's road. */
 function seedLabel(v){ return (v>>>0).toString(36).toUpperCase().slice(0,6); }
-function demoSeed(){ return ((Math.floor(myNow()/D))*2654435761)>>>0; }
+function demoSeed(){
+  /* Without a backend the seed must be derived on the client.
+     Mixing in the Telegram user id gives every player a different
+     (but statistically identical) road, so nobody can share a
+     memorised solution. It does NOT stop clock-forward scouting —
+     only a server-issued seed can. */
+  let v=Math.floor(myNow()/D)*2654435761;
+  if(CONFIG.perPlayerSeed){
+    const uid=String((TG.user||{}).id||'guest');
+    for(let i=0;i<uid.length;i++) v=Math.imul(v^uid.charCodeAt(i),2246822519);
+  }
+  return v>>>0;
+}
 let DAILY_SEED=demoSeed();
 let SEED_LABEL=seedLabel(DAILY_SEED);
 let RUN_TOKEN='demo';
@@ -783,7 +861,7 @@ function renderBoard(){
   lb.innerHTML=BOARD.map((r,i)=>{
     const rw=[100,50,30,30,30][i];
     return `<div class="lane-row"><div class="sign ${i<3?'g'+(i+1):''}">${i+1}</div>
-      <div class="who"><h4>${r.u}</h4><p>${r.d}/7 days played · ${r.inv} invites</p></div>
+      <div class="who"><h4>${r.u}</h4><p>${r.d}/7 days played${r.inv?' · '+r.inv+' invites':''}</p></div>
       <div class="pts"><b>${r.p}</b><i>${rw} CREDIT</i></div></div>`;
   }).join('');
   myTotal.textContent=S.myTotal; myRank.textContent=S.myRank;
@@ -902,7 +980,8 @@ function finishRun(reason){
   showResult(maxStep,Math.max(0,lives),reason,inputLog.length,true);
   API.submitRun(payload).then(r=>{
     log('submit',r);
-    if(r&&r.verified===false) TG.alert('This run could not be verified and was not counted.');
+    if(r&&r.duplicate) TG.alert('You have already played today. Come back after 00:00 UTC+8.');
+    else if(r&&r.verified===false) TG.alert('This run could not be verified and was not counted.');
     else if(r&&typeof r.score==='number'&&r.score!==maxStep)
       TG.alert('Server score: '+r.score+' lanes.');
   }).catch(e=>log('submit failed',e));
