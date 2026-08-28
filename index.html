@@ -281,7 +281,7 @@ details[open] summary{color:var(--curb)}
         <div class="eyebrow">Invite Bonus</div>
         <div class="bonus" id="bonusNum">+1 life</div>
       </div>
-      <div style="font-size:12.5px;color:var(--dusk)">Extra lives on every run · caps at +3</div>
+      <div style="font-size:12.5px;color:var(--dusk)">Friends who subscribe the bot <b style="color:var(--lane)">and play once</b> · caps at +3</div>
       <div class="track">
         <div class="fill" id="fill"></div>
         <div class="zbr" style="left:calc(33.3% - 7px)"></div>
@@ -302,13 +302,13 @@ details[open] summary{color:var(--curb)}
 
   <section class="card">
     <div class="lb-head">
-      <div class="eyebrow">This Season · Top 5</div>
+      <div class="eyebrow">Today · Top 5</div>
       <div class="season" id="seasonLeft">—</div>
     </div>
     <div id="lb"></div>
     <div class="mine">
-      <span>Your season total · Rank <b style="font-size:13px" id="myRank">14</b></span>
-      <b id="myTotal">186</b>
+      <span>Your score today · Rank <b style="font-size:13px" id="myRank">—</b></span>
+      <b id="myTotal">—</b>
     </div>
   </section>
 
@@ -337,7 +337,7 @@ details[open] summary{color:var(--curb)}
         <li>Lanes you have already crossed do not score again, so a death costs you real ground.</li>
         <li>The run ends when lives run out or time expires. Your score is the <b>furthest lane reached</b>.</li>
         <li>Traffic gets faster and denser every 10 lanes.</li>
-        <li>A season runs <b>7 days</b> (Monday 00:00 to Sunday 23:59). Ranking uses your <b>7-day total</b>, not your best single run.</li>
+        <li>The leaderboard <b>resets every day at 00:00 (UTC+8)</b>. Your rank is your single run for that day — a bad day never follows you.</li>
       </ol></div>
     </details>
 
@@ -353,12 +353,13 @@ details[open] summary{color:var(--curb)}
     <details>
       <summary>Invite bonus</summary>
       <div class="body"><ol>
-        <li>Use <b>your personal invite link</b> to bring friends into the <b>@krgilersquad</b> group.</li>
-        <li>10 members <b>+1 life</b> · 20 members <b>+2 lives</b> · 30 members <b>+3 lives</b>.</li>
+        <li>Share <b>your personal invite link</b>. Friends who open it subscribe to <b>@KRminigame_bot</b>.</li>
+        <li>A referral only counts once that friend has <b>played at least one run</b>.</li>
+        <li>10 friends <b>+1 life</b> · 20 friends <b>+2 lives</b> · 30 friends <b>+3 lives</b>.</li>
         <li><b>+3 is the cap.</b> Inviting beyond 30 adds nothing further.</li>
         <li>Extra lives give you more room for error. They do <b>not</b> add points — distance is still earned by skill.</li>
         <li>Applies to <b>every run</b>, counted from your valid total at the moment the run starts.</li>
-        <li>Only members <b>still in the group at settlement</b> count. Anyone who leaves is deducted, and rejoining does not count twice.</li>
+        <li>Referrals are <b>counted for life</b> — they never reset. Each person can only ever be referred once.</li>
         <li class="warn">Duplicate IPs, duplicate devices, blank new accounts and bulk-added members are excluded.</li>
       </ol></div>
     </details>
@@ -367,8 +368,8 @@ details[open] summary{color:var(--curb)}
       <summary>Rewards &amp; claiming</summary>
       <div class="body"><ol>
         <li>Top 1 — <b>100 Credit</b> · Top 2 — <b>50 Credit</b> · Top 3 to Top 5 — <b>30 Credit</b>.</li>
-        <li>On a tie, <b>whoever reached the score first ranks higher</b>.</li>
-        <li>Winners are announced in the Telegram group within <b>24 hours</b> of season end, shown by <b>Telegram username</b>.</li>
+        <li>On a tie, <b>whoever reached the score first ranks higher</b> — the time each score was set is shown on the board.</li>
+        <li>Winners are announced <b>daily</b> after the 00:00 reset, shown by <b>Telegram username</b>.</li>
         <li>Reward Credit carries a <b>3× turnover requirement</b> and cannot be withdrawn or transferred until it is met.</li>
         <li>Winners must tap CLAIM NOW within <b>7 days</b> of the announcement. Unclaimed rewards are forfeited.</li>
         <li>Credit is issued to your kgame99 account, so registration is required first.</li>
@@ -423,9 +424,10 @@ const CONFIG={
 
   apiBase   : '',                              // only for a real backend later
   groupUrl  : 'https://t.me/krgilersquad',
+  botName   : 'KRminigame_bot',                // referrals point at this bot
   claimUrl  : 'https://kgame99.com/register',
   baseLives : 3,
-  shareText : 'Join KR Giler Squad with me — Chicky Road, daily leaderboard, real rewards.'
+  shareText : 'Chicky Road 🐔 — one run a day, daily leaderboard. Subscribe and play with me.'
 };
 
 /* ── Telegram WebApp adapter (safe in a plain browser too) ── */
@@ -517,13 +519,13 @@ const CHICK_URI="url(\"data:image/svg+xml;utf8,"+encodeURIComponent(
 `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M26 15h4v6h-4zM30 11h4v6h-4zM34 15h4v6h-4z" fill="#E5484D"/><ellipse cx="32" cy="34" rx="18" ry="17" fill="#FFF8EC"/><circle cx="26" cy="30" r="3" fill="#1B2836"/><circle cx="38" cy="30" r="3" fill="#1B2836"/><path d="M32 35l-5 3 5 3 5-3z" fill="#F4A93D"/></svg>`)+"\")";
 
 /* ═══ mock data ═══ */
-const S={invited:8,myTotal:186,myRank:14};
+const S={invited:8,myTotal:0,myRank:0};
 const TIERS=[{n:10,l:1},{n:20,l:2},{n:30,l:3}];
 const livesOf=n=>TIERS.filter(t=>n>=t.n).map(t=>t.l).pop()||0;
 const BOARD=[
-  {u:'@kopi_o_kaw',p:412,d:7,inv:30},{u:'@SitiTapz',p:388,d:7,inv:20},
-  {u:'@AhBengKL_88',p:355,d:6,inv:30},{u:'@Devi_Rush',p:341,d:7,inv:10},
-  {u:'@limyaokai',p:327,d:6,inv:20},
+  {u:'@kopi_o_kaw',p:74,at:'08:12'},{u:'@SitiTapz',p:71,at:'13:40'},
+  {u:'@AhBengKL_88',p:66,at:'09:05'},{u:'@Devi_Rush',p:66,at:'19:22'},
+  {u:'@limyaokai',p:61,at:'11:58'},
 ];
 
 /* ═══ SERVER API ═══════════════════════════════════════════
@@ -533,6 +535,8 @@ const BOARD=[
    and the server replays them against the seed it issued.
    ══════════════════════════════════════════════════════════ */
 let inviteLink=CONFIG.groupUrl;
+let invitePending=0;          // subscribed but hasn't played a run yet
+function myInviteLink(){ return 'https://t.me/'+CONFIG.botName+'?start=ref_'+tgId(); }
 async function call(path,body){
   const r=await fetch(CONFIG.apiBase+path,{
     method:'POST',
@@ -577,22 +581,26 @@ const API={
     if(CONFIG.apiBase) return call('/chicky/state');
     if(SB.on){
       const id=tgId();
-      const [board,today]=await Promise.all([
+      const q='?select=*&tg_id=eq.'+encodeURIComponent(id);
+      const [board,today,inv]=await Promise.all([
         SB.get('cr_leaderboard?select=*&limit=50'),
-        SB.get('cr_today?select=tg_id&tg_id=eq.'+encodeURIComponent(id))
+        SB.get('cr_today?select=tg_id&tg_id=eq.'+encodeURIComponent(id)),
+        SB.get('cr_invite_stats'+q).catch(()=>[])
       ]);
-      const rows=board.map(r=>({u:'@'+r.username,p:r.total,d:r.days,tg:r.tg_id}));
+      const st=inv[0]||{total:0,valid:0};
+      invitePending=Math.max(0,st.total-st.valid);
+      const rows=board.map(r=>({u:'@'+r.username,p:r.score,at:r.at,tg:r.tg_id}));
       const mine=rows.findIndex(r=>r.tg===id);
       return {
         canPlay: today.length===0,
         leaderboard: rows.slice(0,5),
         myTotal: mine>-1?rows[mine].p:0,
         myRank : mine>-1?mine+1:rows.length+1,
-        invited: 0,
-        inviteLink: CONFIG.groupUrl
+        invited: st.valid,
+        inviteLink: myInviteLink()
       };
     }
-    return {invited:S.invited,inviteLink:CONFIG.groupUrl+'?start=inv_A7K92',
+    return {invited:S.invited,inviteLink:myInviteLink(),
       canPlay:true,myTotal:S.myTotal,myRank:S.myRank,leaderboard:BOARD};
   },
   /* START a run: server checks the daily quota and issues seed + token */
@@ -853,18 +861,21 @@ function renderInvite(){
   ['t10','t20','t30'].forEach((id,i)=>
     document.getElementById(id).classList.toggle('on',n>=TIERS[i].n));
   const nx=TIERS.find(t=>n<t.n);
-  nextTier.innerHTML=nx
-    ?`<b>${n}</b> joined · invite <b>${nx.n-n}</b> more for <b>+${nx.l} ${nx.l>1?'lives':'life'}</b>`
-    :`<b>${n}</b> joined · <b>capped at +3 lives</b>, extra invites add nothing`;
+  const head=nx
+    ?`<b>${n}</b> counted · invite <b>${nx.n-n}</b> more for <b>+${nx.l} ${nx.l>1?'lives':'life'}</b>`
+    :`<b>${n}</b> counted · <b>capped at +3 lives</b>, extra invites add nothing`;
+  nextTier.innerHTML=head+(invitePending
+    ?`<br><span style="color:var(--curb)">${invitePending} subscribed but haven't played yet — they count once they do.</span>`
+    :'');
 }
 function renderBoard(){
   lb.innerHTML=BOARD.map((r,i)=>{
     const rw=[100,50,30,30,30][i];
     return `<div class="lane-row"><div class="sign ${i<3?'g'+(i+1):''}">${i+1}</div>
-      <div class="who"><h4>${r.u}</h4><p>${r.d}/7 days played${r.inv?' · '+r.inv+' invites':''}</p></div>
+      <div class="who"><h4>${r.u}</h4><p>set at ${r.at||'—'}</p></div>
       <div class="pts"><b>${r.p}</b><i>${rw} CREDIT</i></div></div>`;
   }).join('');
-  myTotal.textContent=S.myTotal; myRank.textContent=S.myRank;
+  myTotal.textContent=S.myTotal||'—'; myRank.textContent=S.myRank||'—';
 }
 function renderLives(){
   livesRow.innerHTML=Array.from({length:maxLives},(_,i)=>
@@ -908,10 +919,10 @@ function setState(st){
   }
   if(st==='result') showResult(47,1,'time up',52,false);
   if(st==='winner'){
-    veil.innerHTML=`<div class="eyebrow">Season closed</div>
+    veil.innerHTML=`<div class="eyebrow">Yesterday's board</div>
       <div class="clock" style="font-size:42px;color:var(--curb)">TOP 2</div>
-      <p class="hint">@you_kl · 388 lanes<br>50 Credit waiting to be claimed</p>`;
-    cta.innerHTML=`<button class="btn" disabled>NEW SEASON · MONDAY 00:00</button>`;
+      <p class="hint">@you_kl · 71 lanes<br>50 Credit waiting to be claimed</p>`;
+    cta.innerHTML=`<button class="btn" disabled>TODAY'S BOARD IS LIVE</button>`;
   }
   wireJumps();
 }
@@ -925,13 +936,13 @@ const wireJumps=()=>{
 };
 
 function showResult(score,livesLeft,reason,inputs,add){
-  if(add) S.myTotal+=score;
+  if(add) S.myTotal=score;
   running=false; hideReady();
   veil.classList.remove('off'); hud.classList.add('off'); tapzone.classList.add('off');
   veil.innerHTML=`<div class="eyebrow">Run over · ${reason}</div>
     <div class="score">${score}</div>
     <p class="hint">lanes crossed · ${livesLeft} ${livesLeft===1?'life':'lives'} left<br>
-    Season total ${S.myTotal} · rank ${S.myRank}</p>
+    today's rank ${S.myRank||'—'} · board resets at 00:00</p>
     <div class="verify">${inputs} INPUTS LOGGED · AWAITING SERVER REPLAY</div>`;
   const nx=TIERS.find(t=>S.invited<t.n);
   cta.innerHTML=`<button class="btn" data-share="1">
@@ -1002,7 +1013,7 @@ document.querySelectorAll('#dev button').forEach(b=>b.onclick=()=>setState(b.dat
 
 const houseKeeping=setInterval(()=>{
   if(!alive || !stage.isConnected){ clearInterval(houseKeeping); clearInterval(cdTimer); alive=false; return; }
-  seasonLeft.textContent='Ends in '+dhms(untilSeasonEnd());
+  seasonLeft.textContent='Resets in '+hms(untilMidnight());
   if(running) tf.classList.toggle('warn',(RUN_TICKS-gameTicks)/60<=10);
 },250);
 
@@ -1020,7 +1031,7 @@ if(!document.body.dataset.crLinks){
   });
 }
 
-link.value=inviteLink;
+inviteLink=myInviteLink(); link.value=inviteLink;
 renderInvite(); renderBoard(); setState('ready');
 
 /* pull real state; demo mode returns the mocks unchanged */
