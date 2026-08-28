@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Chicky Road</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --asphalt:#1B2836;--asphalt-deep:#121C27;--asphalt-lift:#22303F;
+  --lane:#E8EDF2;--curb:#F4C95D;--grass:#3FBF7F;--brake:#E5484D;
+  --dusk:#6B7C93;--hair:rgba(232,237,242,.10);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px)) !important}
+body{font-family:'Barlow',system-ui,sans-serif;
+  background:radial-gradient(1100px 620px at 50% -10%,#25384B 0%,transparent 62%),var(--asphalt-deep);
+  color:var(--lane);min-height:100vh;display:flex;justify-content:center;
+  padding:0 0 96px;-webkit-font-smoothing:antialiased}
+.shell{width:100%;max-width:440px;padding:0 18px}
+
+.top{display:flex;align-items:center;justify-content:space-between;padding:20px 0 16px}
+.mark{font-family:'Bungee';font-size:19px;line-height:1}
+.mark span{color:var(--curb)}
+.tag{font-family:'Barlow Condensed';font-weight:600;font-size:10px;
+  letter-spacing:.34em;color:var(--dusk);margin-top:5px;text-transform:uppercase}
+.grp{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--hair);
+  border-radius:999px;padding:7px 12px;background:rgba(232,237,242,.03);
+  font-family:'Barlow Semi Condensed';font-weight:600;font-size:12px;
+  color:var(--lane);text-decoration:none;letter-spacing:.04em}
+.grp:hover{border-color:var(--grass);color:var(--grass)}
+.grp b{width:6px;height:6px;border-radius:50%;background:var(--grass)}
+
+.card{background:var(--asphalt);border:1px solid var(--hair);
+  border-radius:16px;overflow:hidden;margin-bottom:14px}
+.eyebrow{font-family:'Bungee';font-size:9.5px;letter-spacing:.2em;
+  color:var(--dusk);text-transform:uppercase}
+
+/* ── stage ── */
+.stage{position:relative;height:340px;overflow:hidden;
+  background:linear-gradient(180deg,#16222E,#101923);touch-action:manipulation}
+#world{position:absolute;top:0;bottom:0;left:0;will-change:transform}
+.strip{position:absolute;top:0;bottom:0}
+.strip.grass{background:linear-gradient(180deg,#3A7D5A,#2A5E43)}
+.strip.grass::before{content:"";position:absolute;top:0;bottom:0;right:0;width:4px;
+  background:var(--curb);opacity:.9}
+.strip.road{background:#233241;
+  box-shadow:inset 1px 0 0 rgba(232,237,242,.09),inset -1px 0 0 rgba(0,0,0,.25)}
+.strip.road .paint{position:absolute;left:50%;top:0;bottom:0;width:3px;margin-left:-1.5px;
+  background:repeating-linear-gradient(180deg,rgba(232,237,242,.22) 0 26px,transparent 26px 52px)}
+.strip.road.zebra .paint{left:8%;right:8%;width:auto;margin:0;
+  background:repeating-linear-gradient(180deg,rgba(232,237,242,.5) 0 13px,transparent 13px 30px)}
+.strip.median{background:linear-gradient(180deg,#3A7D5A,#2A5E43);
+  box-shadow:inset 3px 0 0 var(--curb),inset -3px 0 0 var(--curb)}
+.strip.median .flag{position:absolute;left:50%;top:10px;transform:translateX(-50%);
+  font-family:'Bungee';font-size:11px;color:#0B1A13;background:var(--curb);
+  padding:3px 7px;border-radius:5px;white-space:nowrap}
+.strip.median .cp{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);
+  font-family:'Barlow Semi Condensed';font-weight:600;font-size:9px;letter-spacing:.14em;
+  color:rgba(255,255,255,.75);white-space:nowrap}
+.bush{position:absolute;border-radius:50%;background:#4E9C6F;box-shadow:0 4px 0 rgba(0,0,0,.18)}
+
+.car{position:absolute;width:40px;height:70px;border-radius:8px;
+  box-shadow:0 8px 18px rgba(0,0,0,.5);will-change:transform}
+.car .glass{position:absolute;left:5px;right:5px;height:15px;border-radius:4px;background:rgba(10,18,26,.45)}
+.car .glass.a{top:11px}.car .glass.b{bottom:11px}
+.car .roof{position:absolute;left:9px;right:9px;top:32px;height:8px;border-radius:3px;background:rgba(0,0,0,.16)}
+.car .lamp{position:absolute;width:9px;height:5px;border-radius:3px;background:#FFF3C4;
+  box-shadow:0 0 11px 3px rgba(255,240,180,.55);opacity:.9}
+.car .lamp.l{left:4px}.car .lamp.r{right:4px}
+.car.down .lamp{bottom:2px}.car.up .lamp{top:2px}
+.car .tail{position:absolute;width:9px;height:4px;border-radius:3px;background:#7A2226;
+  opacity:.7;transition:background .1s,box-shadow .1s,opacity .1s}
+.car .tail.l{left:4px}.car .tail.r{right:4px}
+.car.down .tail{top:2px}.car.up .tail{bottom:2px}
+.car.braking .tail{background:var(--brake);opacity:1;box-shadow:0 0 12px 3px rgba(229,72,77,.75)}
+
+#chick{position:absolute;width:56px;height:56px;margin:-28px 0 0 -28px;
+  transition:transform .08s cubic-bezier(.34,1.5,.5,1);z-index:5;
+  filter:drop-shadow(0 9px 7px rgba(0,0,0,.5))}
+#chick.idle{animation:bob 1.9s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-5px)}}
+#chick.blink{animation:blink .18s steps(1) infinite}
+@keyframes blink{50%{opacity:.25}}
+.pop{position:absolute;font-family:'Bungee';font-size:15px;color:var(--curb);
+  pointer-events:none;z-index:6;animation:rise .55s ease-out forwards}
+@keyframes rise{to{transform:translateY(-46px);opacity:0}}
+.splat{position:absolute;z-index:6;font-family:'Bungee';font-size:22px;color:var(--brake);
+  pointer-events:none;animation:splat .7s ease-out forwards}
+@keyframes splat{0%{transform:scale(.4)}30%{transform:scale(1.25)}100%{transform:scale(1);opacity:0}}
+.flash{position:absolute;inset:0;z-index:7;background:var(--brake);opacity:0;pointer-events:none}
+.flash.hit{animation:fl .42s ease-out}
+@keyframes fl{0%{opacity:.55}100%{opacity:0}}
+
+/* ready countdown */
+.ready{position:absolute;inset:0;z-index:8;display:none;pointer-events:none;
+  flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.ready.on{display:flex}
+.ready .num{font-family:'Bungee';font-size:76px;line-height:1;color:var(--curb);
+  text-shadow:0 5px 0 rgba(0,0,0,.5)}
+.ready .num.go{color:var(--grass)}
+.ready .cap{font-family:'Barlow Semi Condensed';font-weight:600;font-size:11px;
+  letter-spacing:.22em;color:rgba(232,237,242,.8);background:rgba(0,0,0,.5);
+  padding:5px 12px;border-radius:6px;text-transform:uppercase}
+.ready .num.beat{animation:beat .35s ease-out}
+@keyframes beat{0%{transform:scale(1.5);opacity:.2}100%{transform:scale(1);opacity:1}}
+
+.veil{position:absolute;inset:0;z-index:9;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:11px;padding:22px;text-align:center;
+  background:linear-gradient(180deg,rgba(16,25,35,.55),rgba(16,25,35,.9))}
+.veil.off{display:none}
+.hud{position:absolute;inset:0;z-index:6;pointer-events:none;
+  display:flex;flex-direction:column;justify-content:space-between;padding:14px}
+.hud.off{display:none}
+.hud-top{display:flex;align-items:flex-start;justify-content:space-between}
+.live{font-family:'Barlow Condensed';font-weight:700;font-size:52px;line-height:.85;
+  color:var(--curb);font-variant-numeric:tabular-nums;text-shadow:0 3px 0 rgba(0,0,0,.5)}
+.live small{display:block;font-family:'Bungee';font-size:8.5px;letter-spacing:.2em;
+  color:rgba(232,237,242,.65);text-shadow:none;margin-top:4px}
+.hud-right{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.lives{display:flex;gap:4px}
+.lives i{width:17px;height:17px;display:block;opacity:.22;background:no-repeat center/contain}
+.lives i.on{opacity:1;filter:drop-shadow(0 2px 2px rgba(0,0,0,.5))}
+.chip{font-family:'Barlow Semi Condensed';font-weight:600;font-size:10px;letter-spacing:.1em;
+  color:rgba(232,237,242,.6);background:rgba(0,0,0,.4);padding:4px 8px;border-radius:6px}
+.timer-bar{height:5px;border-radius:3px;background:rgba(0,0,0,.45);overflow:hidden}
+.timer-fill{height:100%;background:var(--grass);width:100%}
+.timer-fill.warn{background:var(--brake)}
+.timer-fill.hold{background:var(--curb);opacity:.55}
+
+.clock{font-family:'Barlow Condensed';font-weight:700;font-size:58px;line-height:.9;
+  font-variant-numeric:tabular-nums}
+.hint{font-size:13.5px;color:#9FB0C4;max-width:290px;line-height:1.5}
+.hint b{color:var(--lane);font-weight:600}
+.score{font-family:'Barlow Condensed';font-weight:700;font-size:74px;line-height:.85;
+  font-variant-numeric:tabular-nums;color:var(--curb);text-shadow:0 4px 0 rgba(0,0,0,.35)}
+.verify{font-family:'Barlow Semi Condensed';font-weight:600;font-size:10px;
+  letter-spacing:.1em;color:var(--grass);border:1px solid rgba(63,191,127,.35);
+  padding:5px 10px;border-radius:6px}
+.tapzone{position:absolute;inset:0;z-index:10;background:transparent;border:0;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.tapzone.off{display:none}
+.tapzone:focus-visible{outline:3px solid var(--curb);outline-offset:-3px}
+
+.pad{padding:16px}
+.btn{display:block;width:100%;border:0;cursor:pointer;text-align:center;text-decoration:none;
+  font-family:'Bungee';font-size:14px;letter-spacing:.05em;padding:17px;border-radius:12px;
+  color:var(--asphalt-deep);background:var(--curb);box-shadow:0 4px 0 #C79E30;
+  transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #C79E30}
+.btn.go{background:var(--grass);box-shadow:0 4px 0 #2E9161;color:#0B1A13}
+.btn.go:active{box-shadow:0 1px 0 #2E9161}
+.btn:disabled{background:var(--asphalt-lift);color:var(--dusk);box-shadow:none;cursor:not-allowed}
+.btn:focus-visible{outline:3px solid var(--lane);outline-offset:3px}
+.linkish{background:none;border:0;color:var(--dusk);font-size:12.5px;
+  text-decoration:underline;cursor:pointer;padding:10px;font-family:'Barlow'}
+
+.rowtop{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:3px}
+.bonus{font-family:'Barlow Condensed';font-weight:700;font-size:26px;color:var(--grass)}
+.track{position:relative;height:44px;border-radius:8px;margin:14px 0 10px;
+  background:var(--asphalt-deep);overflow:hidden;border:1px solid var(--hair)}
+.track::before,.track::after{content:"";position:absolute;left:0;right:0;height:2px;background:var(--curb);opacity:.5}
+.track::before{top:0}.track::after{bottom:0}
+.zbr{position:absolute;top:0;bottom:0;width:15px;
+  background:repeating-linear-gradient(180deg,var(--lane) 0 5px,transparent 5px 10px);opacity:.28}
+.fill{position:absolute;top:2px;bottom:2px;left:0;background:rgba(63,191,127,.16);
+  border-right:2px solid var(--grass);transition:width .5s cubic-bezier(.3,1,.5,1)}
+.walker{position:absolute;top:50%;width:28px;height:28px;margin:-14px 0 0 -14px;
+  transition:left .5s cubic-bezier(.3,1,.5,1)}
+.ticks{display:flex;justify-content:space-between;font-family:'Barlow Semi Condensed';
+  font-weight:600;font-size:10.5px;letter-spacing:.08em;color:var(--dusk)}
+.ticks span.on{color:var(--grass)}
+.next{font-size:13px;color:var(--dusk);margin-top:12px;line-height:1.5}
+.next b{color:var(--lane);font-weight:600}
+.copy{display:flex;gap:8px;margin-top:12px}
+.copy input{flex:1;min-width:0;background:var(--asphalt-deep);border:1px solid var(--hair);
+  border-radius:9px;padding:11px;color:var(--dusk);font-family:'Barlow Semi Condensed';font-size:12px}
+.copy button{border:0;border-radius:9px;padding:0 16px;background:var(--asphalt-lift);
+  color:var(--lane);font-family:'Barlow Semi Condensed';font-weight:600;font-size:12px;
+  letter-spacing:.1em;cursor:pointer}
+.copy button:hover{background:var(--grass);color:#0B1A13}
+
+.lb-head{display:flex;align-items:center;justify-content:space-between;
+  padding:15px 16px;border-bottom:1px solid var(--hair)}
+.season{font-family:'Barlow Semi Condensed';font-weight:600;font-size:11.5px;
+  color:var(--brake);letter-spacing:.06em;font-variant-numeric:tabular-nums}
+.lane-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px dashed var(--hair)}
+.lane-row:last-child{border-bottom:0}
+.sign{width:30px;height:30px;flex:none;border-radius:7px;display:grid;place-items:center;
+  font-family:'Bungee';font-size:13px;background:var(--asphalt-lift);color:var(--dusk)}
+.sign.g1{background:var(--curb);color:var(--asphalt-deep)}
+.sign.g2{background:#B8C4D2;color:var(--asphalt-deep)}
+.sign.g3{background:#B07B4A;color:#fff}
+.who{flex:1;min-width:0}
+.who h4{font-family:'Barlow Semi Condensed';font-weight:600;font-size:14.5px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who p{font-size:11px;color:var(--dusk);margin-top:1px;font-variant-numeric:tabular-nums}
+.pts{text-align:right;flex:none}
+.pts b{font-family:'Barlow Condensed';font-weight:700;font-size:20px;
+  font-variant-numeric:tabular-nums;display:block;line-height:1}
+.pts i{font-style:normal;font-family:'Barlow Semi Condensed';font-weight:600;
+  font-size:10px;letter-spacing:.06em;color:var(--grass)}
+.mine{padding:13px 16px;background:var(--asphalt-deep);display:flex;
+  justify-content:space-between;align-items:center;font-size:13px;color:var(--dusk)}
+.mine b{font-family:'Barlow Condensed';font-size:19px;color:var(--lane);font-variant-numeric:tabular-nums}
+
+.claim{border-color:rgba(244,201,93,.4);
+  background:linear-gradient(180deg,rgba(244,201,93,.13),rgba(244,201,93,.03))}
+.claim .pad{text-align:center}
+.claim h3{font-family:'Bungee';font-size:17px;margin:9px 0 6px}
+.claim p{font-size:13px;color:var(--dusk);line-height:1.55;margin-bottom:15px}
+.claim p b{color:var(--curb)}
+
+details{border-bottom:1px solid var(--hair)}
+details:last-of-type{border-bottom:0}
+summary{list-style:none;cursor:pointer;padding:14px 16px;display:flex;
+  justify-content:space-between;align-items:center;
+  font-family:'Barlow Semi Condensed';font-weight:600;font-size:13.5px;letter-spacing:.03em}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-family:'Barlow Condensed';font-size:20px;color:var(--dusk)}
+details[open] summary::after{content:"–"}
+details[open] summary{color:var(--curb)}
+.body{padding:0 16px 16px;font-size:13px;line-height:1.7;color:var(--dusk)}
+.body ol{padding-left:17px}
+.body li{margin-bottom:7px}
+.body b{color:var(--lane);font-weight:600}
+.body .warn{color:var(--brake);font-weight:600}
+
+.dev{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:40;
+  display:flex;gap:4px;padding:5px;border-radius:999px;background:rgba(18,28,39,.94);
+  border:1px solid var(--hair);backdrop-filter:blur(9px);box-shadow:0 8px 26px rgba(0,0,0,.5)}
+.dev button{border:0;background:none;color:var(--dusk);cursor:pointer;
+  font-family:'Barlow Semi Condensed';font-weight:600;font-size:11px;
+  letter-spacing:.07em;padding:8px 12px;border-radius:999px}
+.dev button[aria-pressed="true"]{background:var(--curb);color:var(--asphalt-deep)}
+
+.foot{text-align:center;font-size:10.5px;color:#44556A;padding:8px 0 0;line-height:1.7}
+.hidden{display:none !important}
+@media (prefers-reduced-motion:reduce){#chick,.pop,.splat,#chick.idle,.ready .num{transition:none;animation:none}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="top">
+    <div>
+      <div class="mark">CHICKY <span>ROAD</span></div>
+      <div class="tag">Hop Smart · Cross Brave</div>
+    </div>
+    <a class="grp" href="https://t.me/krgilersquad" target="_blank" rel="noopener"><b></b>KR GILER SQUAD</a>
+  </header>
+
+  <section class="card">
+    <div class="stage" id="stage">
+      <div id="world"></div>
+      <div class="hud off" id="hud">
+        <div class="hud-top">
+          <div class="live" id="liveScore">0<small>Lanes</small></div>
+          <div class="hud-right">
+            <div class="lives" id="livesRow"></div>
+            <div class="chip" id="seedChip">SEED —</div>
+          </div>
+        </div>
+        <div class="timer-bar"><div class="timer-fill" id="tf"></div></div>
+      </div>
+      <div class="flash" id="flash"></div>
+      <div class="ready" id="readyUI"><div class="num" id="rNum">3</div><div class="cap" id="rCap">Get ready</div></div>
+      <div class="veil" id="veil"></div>
+      <button class="tapzone off" id="tapzone" aria-label="Tap to hop"></button>
+    </div>
+    <div class="pad" id="cta"></div>
+  </section>
+
+  <section class="card">
+    <div class="pad">
+      <div class="rowtop">
+        <div class="eyebrow">Invite Bonus</div>
+        <div class="bonus" id="bonusNum">+1 life</div>
+      </div>
+      <div style="font-size:12.5px;color:var(--dusk)">Extra lives on every run · caps at +3</div>
+      <div class="track">
+        <div class="fill" id="fill"></div>
+        <div class="zbr" style="left:calc(33.3% - 7px)"></div>
+        <div class="zbr" style="left:calc(66.6% - 7px)"></div>
+        <div class="zbr" style="right:0"></div>
+        <div class="walker" id="walker"></div>
+      </div>
+      <div class="ticks">
+        <span>0</span><span id="t10">10 · +1</span><span id="t20">20 · +2</span><span id="t30">30 · +3</span>
+      </div>
+      <p class="next" id="nextTier"></p>
+      <div class="copy">
+        <input id="link" readonly value="https://t.me/krgilersquad?start=inv_A7K92">
+        <button id="copyBtn">Copy</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="lb-head">
+      <div class="eyebrow">This Season · Top 5</div>
+      <div class="season" id="seasonLeft">—</div>
+    </div>
+    <div id="lb"></div>
+    <div class="mine">
+      <span>Your season total · Rank <b style="font-size:13px" id="myRank">14</b></span>
+      <b id="myTotal">186</b>
+    </div>
+  </section>
+
+  <section class="card claim hidden" id="claimCard">
+    <div class="pad">
+      <div class="eyebrow" style="color:var(--curb)">You made the board</div>
+      <h3>2nd Place</h3>
+      <p>Your <b>50 Credit</b> reward is locked in.<br>
+        A <b>3× turnover</b> is required before withdrawal.<br>
+        Unclaimed after 7 days is forfeited.</p>
+      <a class="btn" href="https://kgame99.com/register" target="_blank" rel="noopener">CLAIM NOW</a>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="pad" style="padding-bottom:6px"><div class="eyebrow">Terms &amp; Conditions</div></div>
+
+    <details open>
+      <summary>How to play</summary>
+      <div class="body"><ol>
+        <li>Each Telegram account gets <b>1 run per day</b>, resetting at <b>00:00 (UTC+8)</b>.</li>
+        <li>A run lasts <b>60 seconds</b> of play and starts with <b>3 lives</b>.</li>
+        <li>Every tap hops the chicken one lane forward. <b>Each new lane crossed scores 1 point.</b></li>
+        <li>Getting hit costs <b>1 life</b>. You respawn at the last <b>grass checkpoint</b> — every 10th lane — after a <b>3-second countdown</b>, then briefly invincible.</li>
+        <li>The clock is <b>paused</b> during every countdown, so a death costs you ground, not time.</li>
+        <li>Lanes you have already crossed do not score again, so a death costs you real ground.</li>
+        <li>The run ends when lives run out or time expires. Your score is the <b>furthest lane reached</b>.</li>
+        <li>Traffic gets faster and denser every 10 lanes.</li>
+        <li>A season runs <b>7 days</b> (Monday 00:00 to Sunday 23:59). Ranking uses your <b>7-day total</b>, not your best single run.</li>
+      </ol></div>
+    </details>
+
+    <details>
+      <summary>Same road for everyone</summary>
+      <div class="body"><ol>
+        <li>Traffic is generated from a <b>single daily seed</b>. Every player on a given day faces the <b>identical road</b> — same cars, same speeds, same gaps.</li>
+        <li>The seed is issued by the server at the start of your run and shown in the corner of the screen.</li>
+        <li>No player receives easier or harder traffic than another.</li>
+      </ol></div>
+    </details>
+
+    <details>
+      <summary>Invite bonus</summary>
+      <div class="body"><ol>
+        <li>Use <b>your personal invite link</b> to bring friends into the <b>@krgilersquad</b> group.</li>
+        <li>10 members <b>+1 life</b> · 20 members <b>+2 lives</b> · 30 members <b>+3 lives</b>.</li>
+        <li><b>+3 is the cap.</b> Inviting beyond 30 adds nothing further.</li>
+        <li>Extra lives give you more room for error. They do <b>not</b> add points — distance is still earned by skill.</li>
+        <li>Applies to <b>every run</b>, counted from your valid total at the moment the run starts.</li>
+        <li>Only members <b>still in the group at settlement</b> count. Anyone who leaves is deducted, and rejoining does not count twice.</li>
+        <li class="warn">Duplicate IPs, duplicate devices, blank new accounts and bulk-added members are excluded.</li>
+      </ol></div>
+    </details>
+
+    <details>
+      <summary>Rewards &amp; claiming</summary>
+      <div class="body"><ol>
+        <li>Top 1 — <b>100 Credit</b> · Top 2 — <b>50 Credit</b> · Top 3 to Top 5 — <b>30 Credit</b>.</li>
+        <li>On a tie, <b>whoever reached the score first ranks higher</b>.</li>
+        <li>Winners are announced in the Telegram group within <b>24 hours</b> of season end, shown by <b>Telegram username</b>.</li>
+        <li>Reward Credit carries a <b>3× turnover requirement</b> and cannot be withdrawn or transferred until it is met.</li>
+        <li>Winners must tap CLAIM NOW within <b>7 days</b> of the announcement. Unclaimed rewards are forfeited.</li>
+        <li>Credit is issued to your kgame99 account, so registration is required first.</li>
+      </ol></div>
+    </details>
+
+    <details>
+      <summary>Fair play</summary>
+      <div class="body"><ol>
+        <li>The score your device displays is <b>provisional</b>. Only your <b>input timings</b> are submitted; the server replays the run against the daily seed and the <b>server result is final</b>.</li>
+        <li>Any run whose inputs do not reproduce the claimed score is <b>voided</b>.</li>
+        <li>Runs showing reaction times consistently below the human threshold are treated as scripted and voided.</li>
+        <li class="warn">Auto-clickers, bots, emulators and multiple accounts forfeit eligibility and freeze any reward.</li>
+        <li>Full input logs are retained, so any disputed run can be replayed on request.</li>
+        <li>The organiser reserves the right of final interpretation and may amend these terms at any time.</li>
+      </ol></div>
+    </details>
+  </section>
+
+  <p class="foot">CHICKY ROAD · Powered by KGAME99<br>Not affiliated with Telegram</p>
+</div>
+
+<nav class="dev" id="dev">
+  <button data-s="ready" aria-pressed="true">Ready</button>
+  <button data-s="cooldown" aria-pressed="false">Cooldown</button>
+  <button data-s="result" aria-pressed="false">Result</button>
+  <button data-s="winner" aria-pressed="false">Winner</button>
+</nav>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   SPA-SAFE BOOT
+   Nothing runs until the markup is actually in the DOM.
+   If your router injects HTML with innerHTML and then evals
+   this script, call ChickyRoad.boot() AFTER the injection.
+   ══════════════════════════════════════════════════════════ */
+(function(){
+'use strict';
+
+/* ══════════════════════════════════════════════════════════
+   CONFIG — the only block you normally need to edit.
+   Leave apiBase empty to run in DEMO mode (mock data, client
+   seed). Set it to your backend to go live.
+   ══════════════════════════════════════════════════════════ */
+const CONFIG={
+  apiBase   : '',                              // e.g. 'https://api.kgame99.com'
+  groupUrl  : 'https://t.me/krgilersquad',
+  claimUrl  : 'https://kgame99.com/register',
+  baseLives : 3,
+  shareText : 'Join KR Giler Squad with me — Chicky Road, daily leaderboard, real rewards.'
+};
+
+/* ── Telegram WebApp adapter (safe in a plain browser too) ── */
+const TG=(function(){
+  const t=window.Telegram&&window.Telegram.WebApp;
+  const inside=!!(t&&typeof t.initData==='string');
+  let backCb=null;
+  const hf=()=>inside&&t.HapticFeedback;
+  return {
+    raw:t, inside,
+    initData  : inside?t.initData:'',
+    user      : inside?((t.initDataUnsafe||{}).user||null):null,
+    startParam: inside?((t.initDataUnsafe||{}).start_param||''):'',
+    init(){
+      if(!inside) return;
+      t.ready(); t.expand();
+      t.disableVerticalSwipes&&t.disableVerticalSwipes();   // stop tap-drag closing the app
+      t.setHeaderColor&&t.setHeaderColor('#121C27');
+      t.setBackgroundColor&&t.setBackgroundColor('#121C27');
+    },
+    tap (){ const h=hf(); h&&h.impactOccurred('light'); },
+    hit (){ const h=hf(); h&&h.notificationOccurred('error'); },
+    win (){ const h=hf(); h&&h.notificationOccurred('success'); },
+    open  (u){ inside&&t.openLink        ? t.openLink(u)        : window.open(u,'_blank','noopener'); },
+    openTg(u){ inside&&t.openTelegramLink? t.openTelegramLink(u): window.open(u,'_blank','noopener'); },
+    alert (m,cb){ inside&&t.showAlert  ? t.showAlert(m,cb) : (window.alert(m),cb&&cb()); },
+    confirm(m,cb){ inside&&t.showConfirm? t.showConfirm(m,cb): cb(window.confirm(m)); },
+    back(on,cb){
+      if(!inside||!t.BackButton) return;
+      if(on){ backCb=cb; t.BackButton.show(); t.BackButton.onClick(cb); }
+      else { t.BackButton.hide(); backCb&&t.BackButton.offClick(backCb); backCb=null; }
+    },
+    onViewport(cb){ inside&&t.onEvent&&t.onEvent('viewportChanged',cb); }
+  };
+})();
+
+const DEBUG=/[?&]debug=1/.test(location.search)||TG.startParam==='debug';
+const log=(...a)=>{ if(DEBUG) console.log('[ChickyRoad]',...a); };
+let alive=false;
+
+function boot(auto){
+  const $=id=>document.getElementById(id);
+  const stage=$('stage'), world=$('world');
+  if(!stage||!world){
+    /* silent on auto-boot: the router simply hasn't injected the markup yet */
+    if(!auto) log('markup not in the DOM — insert the HTML before calling boot().');
+    return false;
+  }
+
+  /* SINGLETON: if this script gets evaluated twice (SPA routers often do),
+     shut the previous instance down instead of running two game loops. */
+  if(typeof window.__chickyStop==='function'){
+    window.__chickyStop();
+    log('previous instance stopped.');
+  }
+  alive=true;
+  window.__chickyStop=function(){ alive=false; };
+
+  /* every element resolved explicitly — no reliance on window.<id> globals */
+  const flash=$('flash'), readyUI=$('readyUI'), rNum=$('rNum'), rCap=$('rCap'),
+        veil=$('veil'), hud=$('hud'), tapzone=$('tapzone'), cta=$('cta'),
+        liveScore=$('liveScore'), livesRow=$('livesRow'), seedChip=$('seedChip'), tf=$('tf'),
+        bonusNum=$('bonusNum'), fill=$('fill'), walker=$('walker'), nextTier=$('nextTier'),
+        link=$('link'), copyBtn=$('copyBtn'), lb=$('lb'), myTotal=$('myTotal'),
+        myRank=$('myRank'), seasonLeft=$('seasonLeft'), claimCard=$('claimCard');
+
+  const missing=Object.entries({flash,readyUI,rNum,rCap,veil,hud,tapzone,cta,liveScore,
+    livesRow,seedChip,tf,bonusNum,fill,walker,nextTier,link,copyBtn,lb,myTotal,myRank,
+    seasonLeft,claimCard}).filter(([,v])=>!v).map(([k])=>k);
+  if(missing.length){
+    console.error('[ChickyRoad] missing elements:',missing.join(', '));
+    alive=false; return false;
+  }
+
+/* ═══ sprite ═══ */
+const CHICK=`<svg viewBox="0 0 64 64" aria-hidden="true" style="width:100%;height:100%">
+<ellipse cx="32" cy="57" rx="15" ry="3.5" fill="rgba(0,0,0,.3)"/>
+<path d="M26 15h4v6h-4zM30 11h4v6h-4zM34 15h4v6h-4z" fill="#E5484D"/>
+<ellipse cx="32" cy="36" rx="17" ry="16" fill="#FFF8EC"/>
+<ellipse cx="32" cy="26" rx="13" ry="12" fill="#FFFDF7"/>
+<circle cx="27" cy="25" r="2.6" fill="#1B2836"/><circle cx="37" cy="25" r="2.6" fill="#1B2836"/>
+<circle cx="27.9" cy="24.2" r="1" fill="#fff"/><circle cx="37.9" cy="24.2" r="1" fill="#fff"/>
+<path d="M32 29l-5 3 5 3 5-3z" fill="#F4A93D"/>
+<path d="M15 36q-4 3 0 8" stroke="#F0E6D2" stroke-width="4" fill="none" stroke-linecap="round"/>
+<path d="M49 36q4 3 0 8" stroke="#F0E6D2" stroke-width="4" fill="none" stroke-linecap="round"/>
+<path d="M25 50v6M39 50v6" stroke="#F4A93D" stroke-width="3.5" stroke-linecap="round"/>
+<path d="M21 57h8M35 57h8" stroke="#F4A93D" stroke-width="3.5" stroke-linecap="round"/></svg>`;
+const CHICK_URI="url(\"data:image/svg+xml;utf8,"+encodeURIComponent(
+`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M26 15h4v6h-4zM30 11h4v6h-4zM34 15h4v6h-4z" fill="#E5484D"/><ellipse cx="32" cy="34" rx="18" ry="17" fill="#FFF8EC"/><circle cx="26" cy="30" r="3" fill="#1B2836"/><circle cx="38" cy="30" r="3" fill="#1B2836"/><path d="M32 35l-5 3 5 3 5-3z" fill="#F4A93D"/></svg>`)+"\")";
+
+/* ═══ mock data ═══ */
+const S={invited:8,myTotal:186,myRank:14};
+const TIERS=[{n:10,l:1},{n:20,l:2},{n:30,l:3}];
+const livesOf=n=>TIERS.filter(t=>n>=t.n).map(t=>t.l).pop()||0;
+const BOARD=[
+  {u:'@kopi_o_kaw',p:412,d:7,inv:30},{u:'@SitiTapz',p:388,d:7,inv:20},
+  {u:'@AhBengKL_88',p:355,d:6,inv:30},{u:'@Devi_Rush',p:341,d:7,inv:10},
+  {u:'@limyaokai',p:327,d:6,inv:20},
+];
+
+/* ═══ SERVER API ═══════════════════════════════════════════
+   Every call carries TG.initData — the server MUST verify its
+   HMAC signature with the bot token before trusting the user.
+   The client never decides the score: it submits input timings
+   and the server replays them against the seed it issued.
+   ══════════════════════════════════════════════════════════ */
+let inviteLink=CONFIG.groupUrl;
+async function call(path,body){
+  const r=await fetch(CONFIG.apiBase+path,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(Object.assign({initData:TG.initData,startParam:TG.startParam},body||{}))
+  });
+  if(!r.ok) throw new Error(path+' → '+r.status);
+  return r.json();
+}
+const API={
+  demo: !CONFIG.apiBase,
+  /* GET player state: invite count, personal link, whether today's run is used */
+  async state(){
+    if(this.demo) return {invited:S.invited,inviteLink:CONFIG.groupUrl+'?start=inv_A7K92',
+      canPlay:true,myTotal:S.myTotal,myRank:S.myRank,leaderboard:BOARD};
+    return call('/chicky/state');
+  },
+  /* START a run: server checks the daily quota and issues seed + token */
+  async startRun(){
+    if(this.demo) return {seed:demoSeed(),runToken:'demo',
+      lives:CONFIG.baseLives+livesOf(S.invited),invited:S.invited};
+    return call('/chicky/start');
+  },
+  /* SUBMIT input timings — server replays and returns the authoritative score */
+  async submitRun(p){
+    if(this.demo) return {verified:true,score:p.claimedScore};
+    return call('/chicky/submit',p);
+  }
+};
+
+/* ═══ clocks (UTC+8) ═══ */
+const D=864e5, myNow=()=>Date.now()+8*36e5;
+const untilMidnight=()=>D-(myNow()%D);
+const untilSeasonEnd=()=>{const n=myNow(),d=Math.floor(n/D);return (d+((3-d%7+7)%7)+1)*D-n;};
+const pad=n=>String(n).padStart(2,'0');
+const hms=ms=>{const s=Math.max(0,ms/1000|0);return pad(s/3600|0)+':'+pad(s%3600/60|0)+':'+pad(s%60);};
+const dhms=ms=>{const s=Math.max(0,ms/1000|0);
+  return (s/86400|0)+'d '+pad(s%86400/3600|0)+':'+pad(s%3600/60|0)+':'+pad(s%60);};
+
+/* ═══ DETERMINISTIC WORLD ═══════════════
+   Traffic = pure function of (dailySeed, laneIndex, tick).
+   Taps are timestamped at pointerdown and replayed into the
+   tick they actually belong to — so a dropped frame never
+   costs the player a life, and fast tapping is never immunity.
+═══════════════════════════════════════ */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;
+  var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;
+  return((t^t>>>14)>>>0)/4294967296;};}
+/* The seed MUST come from the server at run start. The local
+   value below is a DEMO fallback only — a client-clock seed lets
+   a player set their phone forward and scout tomorrow's road. */
+function seedLabel(v){ return (v>>>0).toString(36).toUpperCase().slice(0,6); }
+function demoSeed(){ return ((Math.floor(myNow()/D))*2654435761)>>>0; }
+let DAILY_SEED=demoSeed();
+let SEED_LABEL=seedLabel(DAILY_SEED);
+let RUN_TOKEN='demo';
+function applySeed(v){ DAILY_SEED=v>>>0; SEED_LABEL=seedLabel(DAILY_SEED); }
+const laneSeed=k=>((DAILY_SEED^Math.imul(k+1,2246822519))>>>0);
+
+const DT=1/60, LW=78, GRASS=104;
+const RUN_TICKS=3600;          // 60s of *play* — countdowns don't count
+const READY_TICKS=180;         // 3s
+const INVULN_TICKS=60;         // 1s after "GO"
+const HIT=44;                  // forgiving but honest hitbox
+const CAR_COLORS=['#4C8DF6','#7DBE3C','#E8EDF2','#E5484D','#B8C4D2','#F4C95D'];
+const isMedian=k=>k>0&&k%10===0;
+const laneCenter=k=>GRASS+k*LW+LW/2;
+const stepX=s=>s===0?GRASS/2:laneCenter(s-1);
+const checkpointStep=s=>{const m=Math.floor((s-1)/10)*10;return m>0?m+1:0;};
+
+let stageW=440, stageH=340, chickY=177;
+function measure(){stageW=stage.clientWidth;stageH=stage.clientHeight;chickY=Math.round(stageH*.52);}
+
+const lanes=new Map();
+let tick=0, gameTicks=0, step=0, maxStep=0, camX=0;
+let lives=0, maxLives=0, invuln=0, readyLeft=0, running=false;
+let inputLog=[], tapQueue=[], runStartPerf=0, lastRNum=-1;
+
+const startPad=document.createElement('div');
+startPad.className='strip grass';
+startPad.style.cssText=`left:0;width:${GRASS}px`;
+startPad.innerHTML=`<span class="bush" style="width:26px;height:26px;left:14px;top:38px"></span>
+<span class="bush" style="width:34px;height:34px;left:52px;top:170px"></span>
+<span class="bush" style="width:20px;height:20px;left:18px;top:262px"></span>`;
+world.appendChild(startPad);
+
+const chick=document.createElement('div');
+chick.id='chick'; chick.className='idle'; chick.innerHTML=CHICK;
+world.appendChild(chick);
+
+/* ── lanes ── */
+function buildLane(k){
+  const el=document.createElement('div');
+  el.style.cssText=`left:${GRASS+k*LW}px;width:${LW}px`;
+  const lane={k,el,cars:[]};
+  if(isMedian(k)){
+    el.className='strip median';
+    el.innerHTML=`<span class="flag">${k}</span><span class="cp">CHECKPOINT</span>
+      <span class="bush" style="width:22px;height:22px;left:22px;top:140px"></span>`;
+  }else{
+    el.className='strip road'+(k%5===4?' zebra':'');
+    el.innerHTML='<i class="paint"></i>';
+    const r=mulberry32(laneSeed(k));
+    const tier=Math.floor(k/10);
+    const speedMul=1+.08*tier, densMul=1+.05*tier, dir=k%2===0?1:-1;
+    let n=r()<Math.min(.9,.45*densMul)?2:1;
+    if(tier>=3 && r()<Math.min(.55,.22*densMul)) n++;
+    for(let i=0;i<n;i++){
+      const e=document.createElement('div');
+      e.className='car '+(dir>0?'down':'up');
+      e.style.background=CAR_COLORS[(r()*CAR_COLORS.length)|0];
+      e.style.left=(LW-40)/2+'px';
+      e.innerHTML='<i class="glass a"></i><i class="glass b"></i><i class="roof"></i>'+
+        '<i class="lamp l"></i><i class="lamp r"></i><i class="tail l"></i><i class="tail r"></i>';
+      el.appendChild(e);
+      const base=(52+r()*128)*speedMul;
+      lane.cars.push({el:e,dir,base,v:base,y:r()*(stageH+320)-160,mode:'go',t:.5+r()*3,
+        rng:mulberry32((laneSeed(k)+Math.imul(i+1,7919))>>>0)});
+    }
+  }
+  world.appendChild(el); lanes.set(k,lane);
+  for(let i=0;i<tick;i++) stepLane(lane);   // fast-forward to now
+  return lane;
+}
+function ensureLanes(){
+  const from=Math.max(0,Math.floor((camX-GRASS)/LW)-1);
+  const to=Math.floor((camX+stageW-GRASS)/LW)+2;
+  for(const [k,l] of lanes) if(k<from-1||k>to+1){l.el.remove();lanes.delete(k);}
+  for(let k=from;k<=to;k++) if(k>=0&&!lanes.has(k)) buildLane(k);
+}
+function stepLane(lane){
+  for(const c of lane.cars){
+    c.t-=DT;
+    if(c.t<=0){
+      const r=c.rng();
+      c.mode=r<.62?'go':r<.87?'slow':'stop';
+      c.t=c.mode==='go'?2+c.rng()*4:.6+c.rng()*1.8;
+    }
+    const target=c.mode==='stop'?0:c.mode==='slow'?c.base*.3:c.base;
+    const dec=target<c.v?620:300, d=target-c.v;
+    c.v+=Math.sign(d)*Math.min(Math.abs(d),dec*DT);
+    c.y+=c.dir*c.v*DT;
+    if(c.dir>0?c.y>stageH+90:c.y<-90){
+      c.y=c.dir>0?-90-c.rng()*240:stageH+90+c.rng()*240;
+      c.mode='go'; c.t=1+c.rng()*3;
+    }
+  }
+}
+
+/* ── one deterministic tick ── */
+function simStep(tickEndMs){
+  ensureLanes();
+  for(const [,l] of lanes) stepLane(l);
+  if(!running) return;
+
+  /* apply taps that truly happened inside this tick */
+  while(tapQueue.length && tapQueue[0]<=tickEndMs){
+    tapQueue.shift();
+    if(readyLeft<=0) doHop();          // taps during the countdown are dropped
+  }
+
+  if(readyLeft>0){
+    readyLeft--;
+    paintReady();
+    if(readyLeft<=0){ hideReady(); invuln=INVULN_TICKS; chick.classList.add('blink'); }
+    return;                            // clock paused, no collision
+  }
+
+  gameTicks++;
+  if(invuln>0){ invuln--; if(invuln<=0) chick.classList.remove('blink'); }
+  else if(step>0 && !isMedian(step-1)){
+    const lane=lanes.get(step-1);
+    if(lane) for(const c of lane.cars){
+      if(Math.abs(c.y-chickY)<HIT){ die(); return; }   /* immediate — no grace to exploit */
+    }
+  }
+  if(gameTicks>=RUN_TICKS) finishRun('time up');
+}
+
+/* ── actions ── */
+function doHop(){
+  step++; inputLog.push(tick); TG.tap();
+  if(step>maxStep){ maxStep=step; liveScore.innerHTML=maxStep+'<small>Lanes</small>'; }
+  chick.classList.remove('idle');
+  const p=document.createElement('div');
+  p.className='pop'; p.textContent='+1';
+  p.style.cssText=`left:${stepX(step)+14}px;top:${chickY-42}px`;
+  world.appendChild(p); setTimeout(()=>p.remove(),560);
+}
+function die(){
+  lives--; renderLives(); TG.hit();
+  flash.classList.remove('hit'); void flash.offsetWidth; flash.classList.add('hit');
+  const s=document.createElement('div');
+  s.className='splat'; s.textContent='HIT!';
+  s.style.cssText=`left:${stepX(step)-16}px;top:${chickY-14}px`;
+  world.appendChild(s); setTimeout(()=>s.remove(),720);
+  tapQueue.length=0;                      // drop panic taps made before the hit
+  if(lives<=0){ finishRun('out of lives'); return; }
+  step=checkpointStep(step);
+  readyLeft=READY_TICKS; lastRNum=-1;
+  chick.classList.add('blink');
+  showReady(step===0?'Back to the start':'Back to checkpoint '+(step-1));
+  tf.classList.add('hold');
+}
+function showReady(cap){ rCap.textContent=cap; readyUI.classList.add('on'); paintReady(); }
+function hideReady(){ readyUI.classList.remove('on'); tf.classList.remove('hold'); }
+function paintReady(){
+  const n=Math.ceil(readyLeft/60);
+  if(n===lastRNum) return;
+  lastRNum=n;
+  rNum.textContent = n>0?n:'GO!';
+  rNum.className='num beat'+(n<=0?' go':'');
+  void rNum.offsetWidth;
+}
+
+/* ── loop ── */
+let last=performance.now(), acc=0;
+function frame(now){
+  /* stop cleanly when superseded by a newer instance or swapped out by the router */
+  if(!alive || !stage.isConnected){ alive=false; return; }
+  const dt=Math.min(.25,(now-last)/1000); last=now;
+  acc+=dt;
+  let guard=0;
+  while(acc>=DT && guard++<8){
+    simStep(runStartPerf + (tick+1)*DT*1000);
+    tick++; acc-=DT;
+  }
+  camX+=(Math.max(0,stepX(step)-stageW*.30)-camX)*Math.min(1,dt*11);
+  world.style.transform=`translateX(${-camX}px)`;
+  chick.style.transform=`translate(${stepX(step)}px,${chickY}px)`;
+  if(running) tf.style.width=(100-gameTicks/RUN_TICKS*100)+'%';
+  for(const [,l] of lanes) for(const c of l.cars){
+    c.el.style.transform=`translateY(${c.y}px)`;
+    c.el.classList.toggle('braking',c.v<c.base*.35);
+  }
+  requestAnimationFrame(frame);
+}
+measure(); addEventListener('resize',measure);
+chick.style.transform=`translate(${stepX(0)}px,${chickY}px)`;
+ensureLanes(); requestAnimationFrame(frame);
+
+/* ═══ panels ═══ */
+function renderInvite(){
+  const n=S.invited,l=livesOf(n),pct=Math.min(n/30,1)*100;
+  bonusNum.textContent=l?`+${l} ${l>1?'lives':'life'}`:'—';
+  fill.style.width=pct+'%'; walker.style.left=pct+'%'; walker.innerHTML=CHICK;
+  ['t10','t20','t30'].forEach((id,i)=>
+    document.getElementById(id).classList.toggle('on',n>=TIERS[i].n));
+  const nx=TIERS.find(t=>n<t.n);
+  nextTier.innerHTML=nx
+    ?`<b>${n}</b> joined · invite <b>${nx.n-n}</b> more for <b>+${nx.l} ${nx.l>1?'lives':'life'}</b>`
+    :`<b>${n}</b> joined · <b>capped at +3 lives</b>, extra invites add nothing`;
+}
+function renderBoard(){
+  lb.innerHTML=BOARD.map((r,i)=>{
+    const rw=[100,50,30,30,30][i];
+    return `<div class="lane-row"><div class="sign ${i<3?'g'+(i+1):''}">${i+1}</div>
+      <div class="who"><h4>${r.u}</h4><p>${r.d}/7 days played · ${r.inv} invites</p></div>
+      <div class="pts"><b>${r.p}</b><i>${rw} CREDIT</i></div></div>`;
+  }).join('');
+  myTotal.textContent=S.myTotal; myRank.textContent=S.myRank;
+}
+function renderLives(){
+  livesRow.innerHTML=Array.from({length:maxLives},(_,i)=>
+    `<i class="${i<lives?'on':''}" style="background-image:${CHICK_URI}"></i>`).join('');
+}
+
+/* ═══ states ═══ */
+let cdTimer=null;
+function resetWorld(){
+  for(const [,l] of lanes) l.el.remove();
+  lanes.clear();
+  tick=0; gameTicks=0; step=0; maxStep=0; camX=0;
+  invuln=0; readyLeft=0; inputLog=[]; tapQueue.length=0;
+  chick.classList.remove('blink'); hideReady();
+  ensureLanes();
+}
+function setState(st){
+  clearInterval(cdTimer); cdTimer=null;
+  running=false; resetWorld();
+  veil.classList.remove('off'); hud.classList.add('off'); tapzone.classList.add('off');
+  claimCard.classList.toggle('hidden',st!=='winner');
+  document.querySelectorAll('#dev button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.s===st));
+  chick.classList.add('idle');
+
+  if(st==='ready'){
+    const bl=livesOf(S.invited);
+    veil.innerHTML=`<div class="eyebrow">Today · 1 run left</div>
+      <p class="hint">60 seconds. Tap to hop one lane at a time.<br>
+      <b>${3+bl} lives</b> — 3 base${bl?` + ${bl} from invites`:''}.<br>
+      Get hit and you restart from the last green checkpoint.</p>
+      <div class="verify">SERVER-SEEDED ROAD · REPLAY VERIFIED</div>`;
+    cta.innerHTML=`<button class="btn go" id="startBtn">START RUN</button>`;
+    $('startBtn').onclick=play;
+  }
+  if(st==='cooldown'){
+    veil.innerHTML=`<div class="eyebrow">Next run unlocks in</div>
+      <div class="clock" id="cd">--:--:--</div>
+      <p class="hint">Today's run is done. Resets at <b>00:00 UTC+8</b> with a fresh road.</p>`;
+    cta.innerHTML=`<button class="btn" disabled>COME BACK TOMORROW</button>`;
+    cdTimer=setInterval(()=>{const e=document.getElementById('cd');if(e)e.textContent=hms(untilMidnight());},250);
+  }
+  if(st==='result') showResult(47,1,'time up',52,false);
+  if(st==='winner'){
+    veil.innerHTML=`<div class="eyebrow">Season closed</div>
+      <div class="clock" style="font-size:42px;color:var(--curb)">TOP 2</div>
+      <p class="hint">@you_kl · 388 lanes<br>50 Credit waiting to be claimed</p>`;
+    cta.innerHTML=`<button class="btn" disabled>NEW SEASON · MONDAY 00:00</button>`;
+  }
+  wireJumps();
+}
+function shareInvite(){
+  TG.openTg('https://t.me/share/url?url='+encodeURIComponent(inviteLink)+
+            '&text='+encodeURIComponent(CONFIG.shareText));
+}
+const wireJumps=()=>{
+  document.querySelectorAll('[data-jump]').forEach(b=>b.onclick=()=>setState(b.dataset.jump));
+  document.querySelectorAll('[data-share]').forEach(b=>b.onclick=shareInvite);
+};
+
+function showResult(score,livesLeft,reason,inputs,add){
+  if(add) S.myTotal+=score;
+  running=false; hideReady();
+  veil.classList.remove('off'); hud.classList.add('off'); tapzone.classList.add('off');
+  veil.innerHTML=`<div class="eyebrow">Run over · ${reason}</div>
+    <div class="score">${score}</div>
+    <p class="hint">lanes crossed · ${livesLeft} ${livesLeft===1?'life':'lives'} left<br>
+    Season total ${S.myTotal} · rank ${S.myRank}</p>
+    <div class="verify">${inputs} INPUTS LOGGED · AWAITING SERVER REPLAY</div>`;
+  const nx=TIERS.find(t=>S.invited<t.n);
+  cta.innerHTML=`<button class="btn" data-share="1">
+      ${nx?`INVITE ${nx.n-S.invited} MORE · +${nx.l} ${nx.l>1?'LIVES':'LIFE'}`:'SHARE THE GROUP'}</button>
+    <div style="text-align:center"><button class="linkish" data-jump="cooldown">See next run timer</button></div>`;
+  renderBoard(); wireJumps();
+}
+
+/* ═══ run ═══ */
+async function play(){
+  const btn=document.getElementById('startBtn');
+  if(btn){ btn.disabled=true; btn.textContent='CONNECTING…'; }
+  let info;
+  try{ info=await API.startRun(); }
+  catch(err){
+    log('startRun failed',err);
+    if(btn){ btn.disabled=false; btn.textContent='START RUN'; }
+    TG.alert('Could not reach the server. Please try again.');
+    return;
+  }
+  applySeed(info.seed);
+  RUN_TOKEN=info.runToken;
+  if(typeof info.invited==='number'){ S.invited=info.invited; renderInvite(); }
+  beginRun(info.lives);
+}
+function beginRun(serverLives){
+  resetWorld();
+  runStartPerf=performance.now(); last=runStartPerf; acc=0;
+  maxLives=serverLives||CONFIG.baseLives+livesOf(S.invited); lives=maxLives; renderLives();
+  seedChip.textContent='SEED #'+SEED_LABEL;
+  veil.classList.add('off'); hud.classList.remove('off'); tapzone.classList.remove('off');
+  chick.classList.remove('idle');
+  liveScore.innerHTML='0<small>Lanes</small>';
+  tf.style.width='100%'; tf.classList.remove('warn');
+  cta.innerHTML=`<div style="text-align:center"><button class="linkish" id="skip">End run early</button></div>`;
+  readyLeft=READY_TICKS; lastRNum=-1;
+  showReady('Get ready'); tf.classList.add('hold');
+  running=true;
+  TG.back(true,()=>TG.confirm('Quit? Today\'s run will be used up.',ok=>{ if(ok) finishRun('quit'); }));
+  document.getElementById('skip').onclick=()=>finishRun('ended early');
+}
+function finishRun(reason){
+  running=false; hideReady(); tapQueue.length=0; TG.back(false);
+  const payload={runToken:RUN_TOKEN,inputs:inputLog.slice(),
+                 claimedScore:maxStep,livesLeft:Math.max(0,lives),reason};
+  showResult(maxStep,Math.max(0,lives),reason,inputLog.length,true);
+  API.submitRun(payload).then(r=>{
+    log('submit',r);
+    if(r&&r.verified===false) TG.alert('This run could not be verified and was not counted.');
+    else if(r&&typeof r.score==='number'&&r.score!==maxStep)
+      TG.alert('Server score: '+r.score+' lanes.');
+  }).catch(e=>log('submit failed',e));
+}
+
+/* ═══ input ═══ */
+tapzone.addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  if(running) tapQueue.push(performance.now());
+});
+addEventListener('keydown',e=>{
+  if(e.code==='Space'&&running){e.preventDefault();tapQueue.push(performance.now());}
+});
+
+copyBtn.onclick=()=>{navigator.clipboard?.writeText(link.value);
+  copyBtn.textContent='Copied'; setTimeout(()=>copyBtn.textContent='Copy',1400);};
+document.querySelectorAll('#dev button').forEach(b=>b.onclick=()=>setState(b.dataset.s));
+
+const houseKeeping=setInterval(()=>{
+  if(!alive || !stage.isConnected){ clearInterval(houseKeeping); clearInterval(cdTimer); alive=false; return; }
+  seasonLeft.textContent='Ends in '+dhms(untilSeasonEnd());
+  if(running) tf.classList.toggle('warn',(RUN_TICKS-gameTicks)/60<=10);
+},250);
+
+TG.init();
+TG.onViewport(measure);
+
+/* all outbound links go through Telegram's opener */
+if(!document.body.dataset.crLinks){
+  document.body.dataset.crLinks='1';
+  document.body.addEventListener('click',e=>{
+    const a=e.target.closest('a[href^="http"]');
+    if(!a) return;
+    e.preventDefault();
+    if(a.href.indexOf('t.me/')>-1) TG.openTg(a.href); else TG.open(a.href);
+  });
+}
+
+link.value=inviteLink;
+renderInvite(); renderBoard(); setState('ready');
+
+/* pull real state; demo mode returns the mocks unchanged */
+API.state().then(st=>{
+  if(!st) return;
+  if(typeof st.invited==='number') S.invited=st.invited;
+  if(typeof st.myTotal==='number')  S.myTotal=st.myTotal;
+  if(typeof st.myRank==='number')   S.myRank=st.myRank;
+  if(st.inviteLink){ inviteLink=st.inviteLink; link.value=inviteLink; }
+  if(Array.isArray(st.leaderboard)&&st.leaderboard.length){
+    BOARD.length=0; st.leaderboard.forEach(r=>BOARD.push(r));
+  }
+  renderInvite(); renderBoard();
+  if(st.canPlay===false) setState('cooldown');
+}).catch(e=>log('state failed',e));
+
+log(TG.inside?('running inside Telegram · user '+((TG.user||{}).id||'?')):'running in a plain browser');
+log('booted · seed #'+SEED_LABEL);
+return true;
+}  /* ── end boot() ── */
+
+/* auto-boot for a normal page load (silent if the markup isn't there yet) */
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>boot(true));
+else boot(true);
+
+/* manual hook for SPA routers that inject markup after the script runs */
+window.ChickyRoad={ boot:function(){ return boot(false); } };
+})();
+</script>
+</body>
+</html>
