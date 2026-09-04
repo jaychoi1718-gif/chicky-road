@@ -1056,7 +1056,7 @@ TG.onViewport(measure);
   if(m[1]===me)   return say('⚠ that is your own link — test with another account','var(--brake)');
 
   say('saving referral from <b>'+m[1]+'</b>…','var(--curb)');
-  SB.insert('cr_refs',{invitee_id:me,invitee_name:tgName(),referrer_id:m[1]},'invitee_id')
+  SB.insert('cr_refs',{invitee_id:me,invitee_name:tgName(),referrer_id:m[1]})
    .then(r=>say(r.duplicate
       ? '✓ already linked to a referrer'
       : '✓ referral saved → <b>'+m[1]+'</b>','var(--grass)'))
