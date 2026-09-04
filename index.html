@@ -429,6 +429,20 @@ const CONFIG={
   appName   : 'chicky',                        // BotFather → /newapp short name
   claimUrl  : 'https://kgame99.com/register',
   baseLives : 3,
+
+  /* ── DIFFICULTY ───────────────────────────────────────────
+     Tune these, redeploy, watch the median move.
+     Target median ≈ 45–60 lanes.
+     Lower numbers = easier.                                  */
+  diff: {
+    speedRamp   : 0.05,   // car speed +5% every 10 lanes (was 0.08)
+    densityRamp : 0.05,   // traffic density +5% every 10 lanes
+    speedMin    : 46,     // slowest a car starts at   (was 52)
+    speedRange  : 105,    // random speed spread       (was 128)
+    twoCarChance: 0.38,   // chance a lane holds 2 cars (was 0.45)
+    thirdCarTier: 4,      // 3-car lanes start at lane 40 (was 30)
+    thirdCarBase: 0.20
+  },
   shareText : 'Chicky Road 🐔 — one run a day, daily leaderboard. Subscribe and play with me.'
 };
 
@@ -727,11 +741,12 @@ function buildLane(k){
   }else{
     el.className='strip road'+(k%5===4?' zebra':'');
     el.innerHTML='<i class="paint"></i>';
+    const D2=CONFIG.diff;
     const r=mulberry32(laneSeed(k));
     const tier=Math.floor(k/10);
-    const speedMul=1+.08*tier, densMul=1+.05*tier, dir=k%2===0?1:-1;
-    let n=r()<Math.min(.9,.45*densMul)?2:1;
-    if(tier>=3 && r()<Math.min(.55,.22*densMul)) n++;
+    const speedMul=1+D2.speedRamp*tier, densMul=1+D2.densityRamp*tier, dir=k%2===0?1:-1;
+    let n=r()<Math.min(.9,D2.twoCarChance*densMul)?2:1;
+    if(tier>=D2.thirdCarTier && r()<Math.min(.55,D2.thirdCarBase*densMul)) n++;
     for(let i=0;i<n;i++){
       const e=document.createElement('div');
       e.className='car '+(dir>0?'down':'up');
@@ -740,7 +755,7 @@ function buildLane(k){
       e.innerHTML='<i class="glass a"></i><i class="glass b"></i><i class="roof"></i>'+
         '<i class="lamp l"></i><i class="lamp r"></i><i class="tail l"></i><i class="tail r"></i>';
       el.appendChild(e);
-      const base=(52+r()*128)*speedMul;
+      const base=(D2.speedMin+r()*D2.speedRange)*speedMul;
       lane.cars.push({el:e,dir,base,v:base,y:r()*(stageH+320)-160,mode:'go',t:.5+r()*3,
         rng:mulberry32((laneSeed(k)+Math.imul(i+1,7919))>>>0)});
     }
@@ -1039,6 +1054,7 @@ TG.onViewport(measure);
    friend has to open the game anyway for the referral to
    count, so we record it right here.                        */
 function refSay(msg,color){
+  if(!DEBUG) return;                 // players never see the diagnostics
   const box=document.getElementById('refStatus');
   if(!box) return;
   box.style.display='block';
