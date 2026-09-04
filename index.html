@@ -424,7 +424,8 @@ const CONFIG={
 
   apiBase   : '',                              // only for a real backend later
   groupUrl  : 'https://t.me/krgilersquad',
-  botName   : 'KRminigame_bot',                // referrals point at this bot
+  botName   : 'KRminigame_bot',
+  appName   : 'chicky',                        // BotFather → /newapp short name
   claimUrl  : 'https://kgame99.com/register',
   baseLives : 3,
   shareText : 'Chicky Road 🐔 — one run a day, daily leaderboard. Subscribe and play with me.'
@@ -536,7 +537,9 @@ const BOARD=[
    ══════════════════════════════════════════════════════════ */
 let inviteLink=CONFIG.groupUrl;
 let invitePending=0;          // subscribed but hasn't played a run yet
-function myInviteLink(){ return 'https://t.me/'+CONFIG.botName+'?start=ref_'+tgId(); }
+function myInviteLink(){
+  return 'https://t.me/'+CONFIG.botName+'/'+CONFIG.appName+'?startapp=ref_'+tgId();
+}
 async function call(path,body){
   const r=await fetch(CONFIG.apiBase+path,{
     method:'POST',
@@ -557,9 +560,11 @@ const SB={
     if(!r.ok) throw new Error('GET '+path+' → '+r.status);
     return r.json();
   },
-  async insert(table,row){
-    const r=await fetch(CONFIG.sbUrl+'/rest/v1/'+table,{
-      method:'POST', headers:this.head({Prefer:'return=minimal'}),
+  async insert(table,row,conflict){
+    const q=conflict?('?on_conflict='+conflict):'';
+    const pref=conflict?'resolution=ignore-duplicates,return=minimal':'return=minimal';
+    const r=await fetch(CONFIG.sbUrl+'/rest/v1/'+table+q,{
+      method:'POST', headers:this.head({Prefer:pref}),
       body:JSON.stringify(row)});
     if(r.status===409) return {duplicate:true};       // already played today
     if(!r.ok) throw new Error('POST '+table+' → '+r.status);
@@ -1019,6 +1024,24 @@ const houseKeeping=setInterval(()=>{
 
 TG.init();
 TG.onViewport(measure);
+
+/* ── referral capture ──────────────────────────────────────
+   The invite link opens this Mini App directly with
+   ?startapp=ref_<referrerId>. No bot webhook needed: the
+   friend has to open the game anyway for the referral to
+   count, so we record it right here.                        */
+(function captureReferral(){
+  if(!SB.on||!TG.user) return;
+  const m=/^ref_(\d+)$/.exec(TG.startParam||'');
+  if(!m) return;
+  const referrer=m[1], me=tgId();
+  if(referrer===me) return;                  // no self-referral
+  SB.insert('cr_refs',{
+    invitee_id:me, invitee_name:tgName(), referrer_id:referrer
+  },'invitee_id')
+   .then(r=>log('referral',r.duplicate?'already recorded':'saved →'+referrer))
+   .catch(e=>log('referral failed',e));
+})();
 
 /* all outbound links go through Telegram's opener */
 if(!document.body.dataset.crLinks){
