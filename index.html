@@ -568,7 +568,12 @@ const SB={
       method:'POST', headers:this.head({Prefer:pref}),
       body:JSON.stringify(row)});
     if(r.status===409) return {duplicate:true};       // already played today
-    if(!r.ok) throw new Error('POST '+table+' → '+r.status);
+    if(!r.ok){
+      let detail='';
+      try{ const j=await r.json(); detail=j.message||j.hint||JSON.stringify(j); }
+      catch{ try{ detail=await r.text(); }catch{} }
+      throw new Error(r.status+' '+String(detail).slice(0,160));
+    }
     return {ok:true};
   }
 };
@@ -1055,7 +1060,7 @@ TG.onViewport(measure);
    .then(r=>say(r.duplicate
       ? '✓ already linked to a referrer'
       : '✓ referral saved → <b>'+m[1]+'</b>','var(--grass)'))
-   .catch(e=>say('✗ save failed: '+e.message,'var(--brake)'));
+   .catch(e=>say('✗ '+e.message,'var(--brake)'));
 })();
 
 /* all outbound links go through Telegram's opener */
