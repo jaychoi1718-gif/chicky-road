@@ -593,10 +593,11 @@ const API={
     if(SB.on){
       const id=tgId();
       const q='?select=*&tg_id=eq.'+encodeURIComponent(id);
+      let inviteErr='';
       const [board,today,inv]=await Promise.all([
         SB.get('cr_leaderboard?select=*&limit=50'),
         SB.get('cr_today?select=tg_id&tg_id=eq.'+encodeURIComponent(id)),
-        SB.get('cr_invite_stats'+q).catch(()=>[])
+        SB.get('cr_invite_stats'+q).catch(e=>{ inviteErr=e.message||String(e); return []; })
       ]);
       const st=inv[0]||{total:0,valid:0};
       invitePending=Math.max(0,st.total-st.valid);
@@ -608,6 +609,7 @@ const API={
         myTotal: mine>-1?rows[mine].p:0,
         myRank : mine>-1?mine+1:rows.length+1,
         invited: st.valid,
+        inviteTotal: st.total, inviteValid: st.valid, inviteErr,
         inviteLink: myInviteLink()
       };
     }
@@ -1036,10 +1038,15 @@ TG.onViewport(measure);
    ?startapp=ref_<referrerId>. No bot webhook needed: the
    friend has to open the game anyway for the referral to
    count, so we record it right here.                        */
-(function captureReferral(){
+function refSay(msg,color){
   const box=document.getElementById('refStatus');
-  const say=(msg,color)=>{ if(!box) return;
-    box.style.display='block'; box.style.color=color||'var(--dusk)'; box.innerHTML=msg; };
+  if(!box) return;
+  box.style.display='block';
+  box.style.color=color||'var(--dusk)';
+  box.innerHTML=msg;
+}
+(function captureReferral(){
+  const say=refSay;
 
   const param=TG.startParam||'';
   const me=tgId();
@@ -1088,6 +1095,10 @@ API.state().then(st=>{
     BOARD.length=0; st.leaderboard.forEach(r=>BOARD.push(r));
   }
   renderInvite(); renderBoard();
+  if(st.inviteErr) refSay('✗ invite stats: '+st.inviteErr,'var(--brake)');
+  else if(typeof st.inviteTotal==='number')
+    refSay('stats · total <b>'+st.inviteTotal+'</b> · valid <b>'+st.inviteValid+'</b>',
+           st.inviteValid?'var(--grass)':'var(--dusk)');
   if(st.canPlay===false) setState('cooldown');
 }).catch(e=>log('state failed',e));
 
