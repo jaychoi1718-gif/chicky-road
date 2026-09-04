@@ -293,6 +293,7 @@ details[open] summary{color:var(--curb)}
         <span>0</span><span id="t10">10 · +1</span><span id="t20">20 · +2</span><span id="t30">30 · +3</span>
       </div>
       <p class="next" id="nextTier"></p>
+      <p class="next" id="refStatus" style="display:none;font-size:11.5px"></p>
       <div class="copy">
         <input id="link" readonly value="https://t.me/krgilersquad?start=inv_A7K92">
         <button id="copyBtn">Copy</button>
@@ -1031,16 +1032,30 @@ TG.onViewport(measure);
    friend has to open the game anyway for the referral to
    count, so we record it right here.                        */
 (function captureReferral(){
-  if(!SB.on||!TG.user) return;
-  const m=/^ref_(\d+)$/.exec(TG.startParam||'');
-  if(!m) return;
-  const referrer=m[1], me=tgId();
-  if(referrer===me) return;                  // no self-referral
-  SB.insert('cr_refs',{
-    invitee_id:me, invitee_name:tgName(), referrer_id:referrer
-  },'invitee_id')
-   .then(r=>log('referral',r.duplicate?'already recorded':'saved →'+referrer))
-   .catch(e=>log('referral failed',e));
+  const box=document.getElementById('refStatus');
+  const say=(msg,color)=>{ if(!box) return;
+    box.style.display='block'; box.style.color=color||'var(--dusk)'; box.innerHTML=msg; };
+
+  const param=TG.startParam||'';
+  const me=tgId();
+
+  /* always visible while testing — tells you exactly where it stopped */
+  say('id <b>'+me+'</b> · param <b>'+(param||'(none)')+'</b>');
+
+  if(!SB.on)   return say('⚠ Supabase not configured','var(--brake)');
+  if(!TG.user) return say('⚠ not opened from Telegram — no user id','var(--brake)');
+  if(!param)   return say('id <b>'+me+'</b> · opened without an invite code');
+
+  const m=/^ref_(\d+)$/.exec(param);
+  if(!m)          return say('⚠ bad invite code: <b>'+param+'</b>','var(--brake)');
+  if(m[1]===me)   return say('⚠ that is your own link — test with another account','var(--brake)');
+
+  say('saving referral from <b>'+m[1]+'</b>…','var(--curb)');
+  SB.insert('cr_refs',{invitee_id:me,invitee_name:tgName(),referrer_id:m[1]},'invitee_id')
+   .then(r=>say(r.duplicate
+      ? '✓ already linked to a referrer'
+      : '✓ referral saved → <b>'+m[1]+'</b>','var(--grass)'))
+   .catch(e=>say('✗ save failed: '+e.message,'var(--brake)'));
 })();
 
 /* all outbound links go through Telegram's opener */
