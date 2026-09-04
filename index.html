@@ -186,6 +186,15 @@ body{font-family:'Barlow',system-ui,sans-serif;
 
 .lb-head{display:flex;align-items:center;justify-content:space-between;
   padding:15px 16px;border-bottom:1px solid var(--hair)}
+.lb-tabs{display:flex;gap:4px;background:var(--asphalt-deep);
+  border:1px solid var(--hair);border-radius:999px;padding:3px}
+.lb-tab{border:0;background:none;cursor:pointer;border-radius:999px;
+  font-family:'Barlow Semi Condensed';font-weight:600;font-size:11px;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--dusk);padding:6px 12px}
+.lb-tab.on{background:var(--curb);color:var(--asphalt-deep)}
+.settled{font-family:'Barlow Semi Condensed';font-weight:600;font-size:11.5px;
+  letter-spacing:.06em;color:var(--grass)}
+.empty{padding:26px 16px;text-align:center;font-size:13px;color:var(--dusk)}
 .season{font-family:'Barlow Semi Condensed';font-weight:600;font-size:11.5px;
   color:var(--brake);letter-spacing:.06em;font-variant-numeric:tabular-nums}
 .lane-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px dashed var(--hair)}
@@ -204,6 +213,13 @@ body{font-family:'Barlow',system-ui,sans-serif;
   font-variant-numeric:tabular-nums;display:block;line-height:1}
 .pts i{font-style:normal;font-family:'Barlow Semi Condensed';font-weight:600;
   font-size:10px;letter-spacing:.06em;color:var(--grass)}
+.claim-btn{flex:none;border:0;cursor:pointer;font-family:'Barlow Semi Condensed';
+  font-weight:600;font-size:10px;letter-spacing:.1em;padding:7px 11px;border-radius:7px;
+  background:var(--curb);color:var(--asphalt-deep);transition:filter .1s}
+.claim-btn:hover{filter:brightness(1.1)}
+.claim-btn:active{transform:translateY(1px)}
+.claim-btn.off{background:transparent;color:#3E4E60;cursor:default;
+  border:1px solid rgba(232,237,242,.08)}
 .mine{padding:13px 16px;background:var(--asphalt-deep);display:flex;
   justify-content:space-between;align-items:center;font-size:13px;color:var(--dusk)}
 .mine b{font-family:'Barlow Condensed';font-size:19px;color:var(--lane);font-variant-numeric:tabular-nums}
@@ -290,7 +306,7 @@ details[open] summary{color:var(--curb)}
         <div class="walker" id="walker"></div>
       </div>
       <div class="ticks">
-        <span>0</span><span id="t10">10 · +1</span><span id="t20">20 · +2</span><span id="t30">30 · +3</span>
+        <span>0</span><span id="t10">3 · +1</span><span id="t20">6 · +2</span><span id="t30">9 · +3</span>
       </div>
       <p class="next" id="nextTier"></p>
       <p class="next" id="refStatus" style="display:none;font-size:11.5px"></p>
@@ -303,11 +319,14 @@ details[open] summary{color:var(--curb)}
 
   <section class="card">
     <div class="lb-head">
-      <div class="eyebrow">Today · Top 5</div>
+      <div class="lb-tabs">
+        <button class="lb-tab on" data-tab="today">Today</button>
+        <button class="lb-tab" data-tab="yst">Yesterday</button>
+      </div>
       <div class="season" id="seasonLeft">—</div>
     </div>
     <div id="lb"></div>
-    <div class="mine">
+    <div class="mine" id="mineRow">
       <span>Your score today · Rank <b style="font-size:13px" id="myRank">—</b></span>
       <b id="myTotal">—</b>
     </div>
@@ -317,7 +336,7 @@ details[open] summary{color:var(--curb)}
     <div class="pad">
       <div class="eyebrow" style="color:var(--curb)">You made the board</div>
       <h3>2nd Place</h3>
-      <p>Your <b>50 Credit</b> reward is locked in.<br>
+      <p>Your <b>20 Credit</b> reward is locked in.<br>
         A <b>3× turnover</b> is required before withdrawal.<br>
         Unclaimed after 7 days is forfeited.</p>
       <a class="btn" href="https://kgame99.com/register" target="_blank" rel="noopener">CLAIM NOW</a>
@@ -356,8 +375,8 @@ details[open] summary{color:var(--curb)}
       <div class="body"><ol>
         <li>Share <b>your personal invite link</b>. Friends who open it subscribe to <b>@KRminigame_bot</b>.</li>
         <li>A referral only counts once that friend has <b>played at least one run</b>.</li>
-        <li>10 friends <b>+1 life</b> · 20 friends <b>+2 lives</b> · 30 friends <b>+3 lives</b>.</li>
-        <li><b>+3 is the cap.</b> Inviting beyond 30 adds nothing further.</li>
+        <li>3 friends <b>+1 life</b> · 6 friends <b>+2 lives</b> · 9 friends <b>+3 lives</b>.</li>
+        <li><b>+3 is the cap.</b> Inviting beyond 9 adds nothing further.</li>
         <li>Extra lives give you more room for error. They do <b>not</b> add points — distance is still earned by skill.</li>
         <li>Applies to <b>every run</b>, counted from your valid total at the moment the run starts.</li>
         <li>Referrals are <b>counted for life</b> — they never reset. Each person can only ever be referred once.</li>
@@ -368,7 +387,8 @@ details[open] summary{color:var(--curb)}
     <details>
       <summary>Rewards &amp; claiming</summary>
       <div class="body"><ol>
-        <li>Top 1 — <b>100 Credit</b> · Top 2 — <b>50 Credit</b> · Top 3 to Top 5 — <b>30 Credit</b>.</li>
+        <li>Top 1 — <b>30 Credit</b> · Top 2 — <b>20 Credit</b> · Top 3 — <b>10 Credit</b> · Top 4 and 5 — <b>5 Credit</b>.</li>
+        <li>Tap <b>CLAIM</b> on your row once the day has settled.</li>
         <li>On a tie, <b>whoever reached the score first ranks higher</b> — the time each score was set is shown on the board.</li>
         <li>Winners are announced <b>daily</b> after the 00:00 reset, shown by <b>Telegram username</b>.</li>
         <li>Reward Credit carries a <b>3× turnover requirement</b> and cannot be withdrawn or transferred until it is met.</li>
@@ -428,6 +448,12 @@ const CONFIG={
   botName   : 'KRminigame_bot',
   appName   : 'chicky',                        // BotFather → /newapp short name
   claimUrl  : 'https://kgame99.com/register',
+  /* Claim endpoint. Placeholders are filled in at click time:
+     {rank} {uid} {user} {score} {date}
+     Leave empty to fall back to claimUrl.                     */
+  claimApi  : '',
+  claimOwnRowOnly : true,        // false = every row's button is clickable
+  rewards   : [30,20,10,5,5],    // Top 1 … Top 5, in Credit
   baseLives : 3,
 
   /* ── DIFFICULTY ───────────────────────────────────────────
@@ -508,7 +534,8 @@ function boot(auto){
         liveScore=$('liveScore'), livesRow=$('livesRow'), seedChip=$('seedChip'), tf=$('tf'),
         bonusNum=$('bonusNum'), fill=$('fill'), walker=$('walker'), nextTier=$('nextTier'),
         link=$('link'), copyBtn=$('copyBtn'), lb=$('lb'), myTotal=$('myTotal'),
-        myRank=$('myRank'), seasonLeft=$('seasonLeft'), claimCard=$('claimCard');
+        myRank=$('myRank'), seasonLeft=$('seasonLeft'), claimCard=$('claimCard'),
+        mineRow=$('mineRow');
 
   const missing=Object.entries({flash,readyUI,rNum,rCap,veil,hud,tapzone,cta,liveScore,
     livesRow,seedChip,tf,bonusNum,fill,walker,nextTier,link,copyBtn,lb,myTotal,myRank,
@@ -536,7 +563,7 @@ const CHICK_URI="url(\"data:image/svg+xml;utf8,"+encodeURIComponent(
 
 /* ═══ mock data ═══ */
 const S={invited:8,myTotal:0,myRank:0};
-const TIERS=[{n:10,l:1},{n:20,l:2},{n:30,l:3}];
+const TIERS=[{n:3,l:1},{n:6,l:2},{n:9,l:3}];
 const livesOf=n=>TIERS.filter(t=>n>=t.n).map(t=>t.l).pop()||0;
 const BOARD=[
   {u:'@kopi_o_kaw',p:74,at:'08:12'},{u:'@SitiTapz',p:71,at:'13:40'},
@@ -552,6 +579,8 @@ const BOARD=[
    ══════════════════════════════════════════════════════════ */
 let inviteLink=CONFIG.groupUrl;
 let invitePending=0;          // subscribed but hasn't played a run yet
+let boardTab='today';         // 'today' (live) | 'yst' (settled, claimable)
+const BOARD_YST=[];
 function myInviteLink(){
   return 'https://t.me/'+CONFIG.botName+'/'+CONFIG.appName+'?startapp=ref_'+tgId();
 }
@@ -595,6 +624,10 @@ function myDate(){                                   // today's date in UTC+8
   const d=new Date(myNow());
   return d.getUTCFullYear()+'-'+pad(d.getUTCMonth()+1)+'-'+pad(d.getUTCDate());
 }
+function ystDate(){
+  const d=new Date(myNow()-D);
+  return d.getUTCFullYear()+'-'+pad(d.getUTCMonth()+1)+'-'+pad(d.getUTCDate());
+}
 function tgId(){ return String((TG.user||{}).id||'guest-'+(localStorage.crGuest||
   (localStorage.crGuest=Math.random().toString(36).slice(2,9)))); }
 function tgName(){ return (TG.user||{}).username||(TG.user||{}).first_name||'player'; }
@@ -608,18 +641,21 @@ const API={
       const id=tgId();
       const q='?select=*&tg_id=eq.'+encodeURIComponent(id);
       let inviteErr='';
-      const [board,today,inv]=await Promise.all([
+      const [board,yst,today,inv]=await Promise.all([
         SB.get('cr_leaderboard?select=*&limit=50'),
+        SB.get('cr_leaderboard_yst?select=*&limit=5').catch(()=>[]),
         SB.get('cr_today?select=tg_id&tg_id=eq.'+encodeURIComponent(id)),
         SB.get('cr_invite_stats'+q).catch(e=>{ inviteErr=e.message||String(e); return []; })
       ]);
       const st=inv[0]||{total:0,valid:0};
       invitePending=Math.max(0,st.total-st.valid);
-      const rows=board.map(r=>({u:'@'+r.username,p:r.score,at:r.at,tg:r.tg_id}));
+      const map=a=>a.map(r=>({u:'@'+r.username,p:r.score,at:r.at,tg:r.tg_id}));
+      const rows=map(board), rowsY=map(yst);
       const mine=rows.findIndex(r=>r.tg===id);
       return {
         canPlay: today.length===0,
         leaderboard: rows.slice(0,5),
+        yesterday: rowsY.slice(0,5),
         myTotal: mine>-1?rows[mine].p:0,
         myRank : mine>-1?mine+1:rows.length+1,
         invited: st.valid,
@@ -628,7 +664,9 @@ const API={
       };
     }
     return {invited:S.invited,inviteLink:myInviteLink(),
-      canPlay:true,myTotal:S.myTotal,myRank:S.myRank,leaderboard:BOARD};
+      canPlay:true,myTotal:S.myTotal,myRank:S.myRank,leaderboard:BOARD,
+      yesterday:[{u:'@candybae003',p:52,at:'10:50'},{u:'@huhu77088',p:49,at:'11:03'},
+                 {u:'@jaychoi1718',p:26,at:'10:48'}]};
   },
   /* START a run: server checks the daily quota and issues seed + token */
   async startRun(){
@@ -883,7 +921,7 @@ ensureLanes(); requestAnimationFrame(frame);
 
 /* ═══ panels ═══ */
 function renderInvite(){
-  const n=S.invited,l=livesOf(n),pct=Math.min(n/30,1)*100;
+  const n=S.invited,l=livesOf(n),pct=Math.min(n/TIERS[TIERS.length-1].n,1)*100;
   bonusNum.textContent=l?`+${l} ${l>1?'lives':'life'}`:'—';
   fill.style.width=pct+'%'; walker.style.left=pct+'%'; walker.innerHTML=CHICK;
   ['t10','t20','t30'].forEach((id,i)=>
@@ -897,12 +935,40 @@ function renderInvite(){
     :'');
 }
 function renderBoard(){
-  lb.innerHTML=BOARD.map((r,i)=>{
-    const rw=[100,50,30,30,30][i];
+  const me=tgId();
+  const yst=boardTab==='yst';
+  const rows=yst?BOARD_YST:BOARD;
+
+  document.querySelectorAll('.lb-tab').forEach(b=>
+    b.classList.toggle('on',b.dataset.tab===boardTab));
+  seasonLeft.className=yst?'settled':'season';
+  mineRow.style.display=yst?'none':'';
+
+  if(!rows.length){
+    lb.innerHTML='<div class="empty">'+(yst
+      ? 'No results yesterday.'
+      : 'No runs yet today — be the first.')+'</div>';
+    return;
+  }
+  lb.innerHTML=rows.map((r,i)=>{
+    const rw=CONFIG.rewards[i]||0;
+    /* claiming only makes sense once the day has settled */
+    const can=yst&&(API.demo||!CONFIG.claimOwnRowOnly||(r.tg&&r.tg===me));
     return `<div class="lane-row"><div class="sign ${i<3?'g'+(i+1):''}">${i+1}</div>
       <div class="who"><h4>${r.u}</h4><p>set at ${r.at||'—'}</p></div>
-      <div class="pts"><b>${r.p}</b><i>${rw} CREDIT</i></div></div>`;
+      <div class="pts"><b>${r.p}</b><i>${rw} CREDIT</i></div>
+      ${yst?`<button class="claim-btn${can?'':' off'}" data-claim="${i+1}"${can?'':' disabled'}>CLAIM</button>`:''}
+      </div>`;
   }).join('');
+  lb.querySelectorAll('[data-claim]:not([disabled])').forEach(b=>b.onclick=()=>{
+    const rank=+b.dataset.claim, row=BOARD_YST[rank-1]||{};
+    const tpl=CONFIG.claimApi||CONFIG.claimUrl;
+    TG.open(tpl.replace('{rank}',rank)
+               .replace('{uid}',encodeURIComponent(tgId()))
+               .replace('{user}',encodeURIComponent((row.u||'').replace(/^@/,'')))
+               .replace('{score}',row.p||0)
+               .replace('{date}',ystDate()));
+  });
   myTotal.textContent=S.myTotal||'—'; myRank.textContent=S.myRank||'—';
 }
 function renderLives(){
@@ -949,7 +1015,7 @@ function setState(st){
   if(st==='winner'){
     veil.innerHTML=`<div class="eyebrow">Yesterday's board</div>
       <div class="clock" style="font-size:42px;color:var(--curb)">TOP 2</div>
-      <p class="hint">@you_kl · 71 lanes<br>50 Credit waiting to be claimed</p>`;
+      <p class="hint">@you_kl · 71 lanes<br>20 Credit waiting to be claimed</p>`;
     cta.innerHTML=`<button class="btn" disabled>TODAY'S BOARD IS LIVE</button>`;
   }
   wireJumps();
@@ -1041,7 +1107,7 @@ document.querySelectorAll('#dev button').forEach(b=>b.onclick=()=>setState(b.dat
 
 const houseKeeping=setInterval(()=>{
   if(!alive || !stage.isConnected){ clearInterval(houseKeeping); clearInterval(cdTimer); alive=false; return; }
-  seasonLeft.textContent='Resets in '+hms(untilMidnight());
+  paintClock();
   if(running) tf.classList.toggle('warn',(RUN_TICKS-gameTicks)/60<=10);
 },250);
 
@@ -1053,6 +1119,11 @@ TG.onViewport(measure);
    ?startapp=ref_<referrerId>. No bot webhook needed: the
    friend has to open the game anyway for the referral to
    count, so we record it right here.                        */
+function paintClock(){
+  seasonLeft.textContent = boardTab==='yst'
+    ? 'Final · claimable'
+    : 'Resets in '+hms(untilMidnight());
+}
 function refSay(msg,color){
   if(!DEBUG) return;                 // players never see the diagnostics
   const box=document.getElementById('refStatus');
@@ -1098,6 +1169,9 @@ if(!document.body.dataset.crLinks){
 }
 
 inviteLink=myInviteLink(); link.value=inviteLink;
+document.querySelectorAll('.lb-tab').forEach(b=>b.onclick=()=>{
+  boardTab=b.dataset.tab; renderBoard(); paintClock();
+});
 renderInvite(); renderBoard(); setState('ready');
 
 /* pull real state; demo mode returns the mocks unchanged */
@@ -1107,8 +1181,11 @@ API.state().then(st=>{
   if(typeof st.myTotal==='number')  S.myTotal=st.myTotal;
   if(typeof st.myRank==='number')   S.myRank=st.myRank;
   if(st.inviteLink){ inviteLink=st.inviteLink; link.value=inviteLink; }
-  if(Array.isArray(st.leaderboard)&&st.leaderboard.length){
+  if(Array.isArray(st.leaderboard)){
     BOARD.length=0; st.leaderboard.forEach(r=>BOARD.push(r));
+  }
+  if(Array.isArray(st.yesterday)){
+    BOARD_YST.length=0; st.yesterday.forEach(r=>BOARD_YST.push(r));
   }
   renderInvite(); renderBoard();
   if(st.inviteErr) refSay('✗ invite stats: '+st.inviteErr,'var(--brake)');
