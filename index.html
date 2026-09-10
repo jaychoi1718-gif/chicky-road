@@ -511,6 +511,10 @@ const CONFIG={
      Leave empty to fall back to claimUrl.                     */
   claimApi  : '',
   claimOwnRowOnly : true,        // false = every row's button is clickable
+
+  /* ⚠️ TESTING ONLY — set back to false before going live.
+     true  = CLAIM shows on both tabs, on every row, for anyone. */
+  claimTestMode   : true,
   rewards   : [30,20,10,5,5],    // Top 1 … Top 5, in Credit
   baseLives : 3,
 
@@ -998,6 +1002,7 @@ function renderInvite(){
 function renderBoard(){
   const me=tgId();
   const yst=boardTab==='yst';
+  const test=CONFIG.claimTestMode;
   const rows=yst?BOARD_YST:BOARD;
 
   document.querySelectorAll('.lb-tab').forEach(b=>
@@ -1014,15 +1019,16 @@ function renderBoard(){
   lb.innerHTML=rows.map((r,i)=>{
     const rw=CONFIG.rewards[i]||0;
     /* claiming only makes sense once the day has settled */
-    const can=yst&&(API.demo||!CONFIG.claimOwnRowOnly||(r.tg&&r.tg===me));
+    const can=test||(yst&&(API.demo||!CONFIG.claimOwnRowOnly||(r.tg&&r.tg===me)));
     return `<div class="lane-row"><div class="sign ${i<3?'g'+(i+1):''}">${i+1}</div>
       <div class="who"><h4>${r.u}</h4><p>set at ${r.at||'—'}</p></div>
       <div class="pts"><b>${r.p}</b><i>${rw} CREDIT</i></div>
-      ${yst?`<button class="claim-btn${can?'':' off'}" data-claim="${i+1}"${can?'':' disabled'}>CLAIM</button>`:''}
+      ${(yst||test)?`<button class="claim-btn${can?'':' off'}" data-claim="${i+1}"${can?'':' disabled'}>CLAIM${test?' ·TEST':''}</button>`:''}
       </div>`;
   }).join('');
   lb.querySelectorAll('[data-claim]:not([disabled])').forEach(b=>b.onclick=()=>{
-    openClaim(+b.dataset.claim, BOARD_YST[+b.dataset.claim-1]||{});
+    const i=+b.dataset.claim-1;
+    openClaim(i+1, rows[i]||{}, yst?ystDate():myDate());
   });
   myTotal.textContent=S.myTotal||'—'; myRank.textContent=S.myRank||'—';
 }
@@ -1187,8 +1193,8 @@ function normPhone(v){
 }
 const validMY=d=>/^1[0-9]{8,9}$/.test(d);
 
-function openClaim(rank,row){
-  claimCtx={rank,row,credit:CONFIG.rewards[rank-1]||0};
+function openClaim(rank,row,forDate){
+  claimCtx={rank,row,date:forDate||ystDate(),credit:CONFIG.rewards[rank-1]||0};
   cmTitle.textContent='Rank #'+rank+' · '+claimCtx.credit+' Credit';
   cmPhone.value=''; cmErr.textContent=''; cmRow.classList.remove('bad');
   cmYes.disabled=false; cmYes.textContent='YES';
@@ -1213,7 +1219,7 @@ async function submitClaim(){
     tg_id: tgId(),
     tg_username: tgName(),
     phone: d,
-    claim_date: ystDate(),
+    claim_date: claimCtx.date,
     rank: claimCtx.rank,
     score: claimCtx.row.p||0,
     credit: claimCtx.credit
