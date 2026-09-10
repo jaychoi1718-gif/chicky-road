@@ -220,6 +220,8 @@ body{font-family:'Barlow',system-ui,sans-serif;
 .claim-btn:active{transform:translateY(1px)}
 .claim-btn.off{background:transparent;color:#3E4E60;cursor:default;
   border:1px solid rgba(232,237,242,.08)}
+.claim-btn.done{background:transparent;color:var(--grass);cursor:default;
+  border:1px solid rgba(63,191,127,.35)}
 .mine{padding:13px 16px;background:var(--asphalt-deep);display:flex;
   justify-content:space-between;align-items:center;font-size:13px;color:var(--dusk)}
 .mine b{font-family:'Barlow Condensed';font-size:19px;color:var(--lane);font-variant-numeric:tabular-nums}
@@ -645,6 +647,7 @@ const BOARD=[
 let inviteLink=CONFIG.groupUrl;
 let invitePending=0;          // subscribed but hasn't played a run yet
 let boardTab='today';         // 'today' (live) | 'yst' (settled, claimable)
+const CLAIMED=new Set();      // claim_date strings this player already claimed
 const BOARD_YST=[];
 function myInviteLink(){
   return 'https://t.me/'+CONFIG.botName+'/'+CONFIG.appName+'?startapp=ref_'+tgId();
@@ -706,11 +709,12 @@ const API={
       const id=tgId();
       const q='?select=*&tg_id=eq.'+encodeURIComponent(id);
       let inviteErr='';
-      const [board,yst,today,inv]=await Promise.all([
+      const [board,yst,today,inv,claims]=await Promise.all([
         SB.get('cr_leaderboard?select=*&limit=50'),
         SB.get('cr_leaderboard_yst?select=*&limit=5').catch(()=>[]),
         SB.get('cr_today?select=tg_id&tg_id=eq.'+encodeURIComponent(id)),
-        SB.get('cr_invite_stats'+q).catch(e=>{ inviteErr=e.message||String(e); return []; })
+        SB.get('cr_invite_stats'+q).catch(e=>{ inviteErr=e.message||String(e); return []; }),
+        SB.get('cr_my_claims?select=claim_date&tg_id=eq.'+encodeURIComponent(id)).catch(()=>[])
       ]);
       const st=inv[0]||{total:0,valid:0};
       invitePending=Math.max(0,st.total-st.valid);
@@ -723,6 +727,7 @@ const API={
         yesterday: rowsY.slice(0,5),
         myTotal: mine>-1?rows[mine].p:0,
         myRank : mine>-1?mine+1:rows.length+1,
+        claims: claims.map(c=>c.claim_date),
         invited: st.valid,
         inviteTotal: st.total, inviteValid: st.valid, inviteErr,
         inviteLink: myInviteLink()
@@ -1004,6 +1009,8 @@ function renderBoard(){
   const yst=boardTab==='yst';
   const test=CONFIG.claimTestMode;
   const rows=yst?BOARD_YST:BOARD;
+  const boardDate=yst?ystDate():myDate();
+  const done=CLAIMED.has(boardDate);
 
   document.querySelectorAll('.lb-tab').forEach(b=>
     b.classList.toggle('on',b.dataset.tab===boardTab));
@@ -1023,12 +1030,15 @@ function renderBoard(){
     return `<div class="lane-row"><div class="sign ${i<3?'g'+(i+1):''}">${i+1}</div>
       <div class="who"><h4>${r.u}</h4><p>set at ${r.at||'—'}</p></div>
       <div class="pts"><b>${r.p}</b><i>${rw} CREDIT</i></div>
-      ${(yst||test)?`<button class="claim-btn${can?'':' off'}" data-claim="${i+1}"${can?'':' disabled'}>CLAIM${test?' ·TEST':''}</button>`:''}
+      ${(yst||test)?(done
+          ? `<button class="claim-btn done" disabled>CLAIMED</button>`
+          : `<button class="claim-btn${can?'':' off'}" data-claim="${i+1}"${can?'':' disabled'}>CLAIM${test?' ·TEST':''}</button>`
+        ):''}
       </div>`;
   }).join('');
   lb.querySelectorAll('[data-claim]:not([disabled])').forEach(b=>b.onclick=()=>{
     const i=+b.dataset.claim-1;
-    openClaim(i+1, rows[i]||{}, yst?ystDate():myDate());
+    openClaim(i+1, rows[i]||{}, boardDate);
   });
   myTotal.textContent=S.myTotal||'—'; myRank.textContent=S.myRank||'—';
 }
@@ -1194,7 +1204,9 @@ function normPhone(v){
 const validMY=d=>/^1[0-9]{8,9}$/.test(d);
 
 function openClaim(rank,row,forDate){
-  claimCtx={rank,row,date:forDate||ystDate(),credit:CONFIG.rewards[rank-1]||0};
+  const date=forDate||ystDate();
+  if(CLAIMED.has(date)){ TG.alert('You have already claimed this reward.'); return; }
+  claimCtx={rank,row,date,credit:CONFIG.rewards[rank-1]||0};
   cmTitle.textContent='Rank #'+rank+' · '+claimCtx.credit+' Credit';
   cmPhone.value=''; cmErr.textContent=''; cmRow.classList.remove('bad');
   cmYes.disabled=false; cmYes.textContent='YES';
@@ -1215,33 +1227,40 @@ async function submitClaim(){
   cmRow.classList.remove('bad'); cmErr.textContent='';
   cmYes.disabled=true; cmYes.textContent='SENDING…';
 
-  const payload={
-    tg_id: tgId(),
-    tg_username: tgName(),
-    phone: d,
-    claim_date: claimCtx.date,
-    rank: claimCtx.rank,
-    score: claimCtx.row.p||0,
-    credit: claimCtx.credit
-  };
+  /* 1 — keep our own record first, so the claim exists even if
+         the player never presses START in the bot chat */
+  if(!API.demo){
+    try{
+      await SB.insert('cr_claims',{
+        tg_id: tgId(), tg_username: tgName(), phone: d,
+        claim_date: claimCtx.date, rank: claimCtx.rank,
+        score: claimCtx.row.p||0, credit: claimCtx.credit
+      });
+    }catch(e){
+      const m=String(e.message||e);
+      cmYes.disabled=false; cmYes.textContent='YES';
+      cmErr.textContent=/409|duplicate/i.test(m)
+        ? 'You have already claimed this reward.'
+        : m.slice(0,120);
+      if(/409|duplicate/i.test(m)){ CLAIMED.add(claimCtx.date); renderBoard(); }
+      return;
+    }
+  }
 
-  if(API.demo){
-    return showClaimDone('Demo mode — nothing was sent.');
-  }
-  try{
-    const r=await SB.insert('cr_claims',payload);
-    if(r.duplicate) return showClaimDone('You have already claimed this reward.');
-    showClaimDone('We will message you on Telegram once '+claimCtx.credit+
-                  ' Credit is credited to +60'+d+'.');
-  }catch(e){
-    cmYes.disabled=false; cmYes.textContent='YES';
-    cmErr.textContent=String(e.message||e).slice(0,120);
-  }
-}
-function showClaimDone(msg){
-  cmDoneMsg.textContent=msg;
-  cmForm.hidden=true; cmDone.hidden=false;
+  /* 2 — hand the details to the bot through the start payload.
+         Telegram only allows [A-Za-z0-9_-] there, so the space is
+         encoded as an underscore:
+              payload   60123456789_10
+              decoded   60123456789 10
+         Bot side:  payload.replace('_', ' ')
+         The amount comes from CONFIG.rewards[rank-1].              */
+  const payload='60'+d+'_'+claimCtx.credit;
+
+  CLAIMED.add(claimCtx.date);
+  renderBoard();
   TG.win();
+  TG.openTg('https://t.me/'+CONFIG.botName+'?start='+payload);
+  closeClaim();
 }
 
 function paintClock(){
@@ -1322,6 +1341,7 @@ API.state().then(st=>{
   if(Array.isArray(st.yesterday)){
     BOARD_YST.length=0; st.yesterday.forEach(r=>BOARD_YST.push(r));
   }
+  if(Array.isArray(st.claims)){ CLAIMED.clear(); st.claims.forEach(d=>CLAIMED.add(d)); }
   renderInvite(); renderBoard();
   if(st.inviteErr) refSay('✗ invite stats: '+st.inviteErr,'var(--brake)');
   else if(typeof st.inviteTotal==='number')
