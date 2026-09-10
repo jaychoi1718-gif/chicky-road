@@ -246,6 +246,34 @@ details[open] summary{color:var(--curb)}
 .body b{color:var(--lane);font-weight:600}
 .body .warn{color:var(--brake);font-weight:600}
 
+.cr-modal{position:fixed;inset:0;z-index:60;display:flex;align-items:center;
+  justify-content:center;padding:20px;background:rgba(8,13,19,.78);
+  backdrop-filter:blur(4px)}
+.cr-modal[hidden]{display:none}
+.cr-sheet{width:100%;max-width:360px;background:var(--asphalt);
+  border:1px solid var(--hair);border-radius:18px;padding:22px;
+  box-shadow:0 24px 60px rgba(0,0,0,.6)}
+.cr-sheet h3{font-family:'Bungee';font-size:17px;margin:8px 0 8px}
+.cr-sheet p{font-size:13px;line-height:1.55;color:var(--dusk)}
+.phone-row{display:flex;align-items:center;gap:0;margin:16px 0 6px;
+  background:var(--asphalt-deep);border:1px solid var(--hair);border-radius:11px;
+  overflow:hidden;transition:border-color .15s}
+.phone-row.bad{border-color:var(--brake)}
+.phone-row .pfx{font-family:'Barlow Condensed';font-weight:700;font-size:19px;
+  color:var(--curb);padding:0 12px 0 14px;border-right:1px solid var(--hair);
+  line-height:48px;flex:none}
+.phone-row input{flex:1;min-width:0;background:none;border:0;outline:0;
+  color:var(--lane);font-family:'Barlow Condensed';font-weight:700;font-size:19px;
+  letter-spacing:.06em;padding:0 12px;height:48px}
+.phone-row input::placeholder{color:#3E4E60;letter-spacing:.04em}
+.cm-err{min-height:17px;font-size:12px;color:var(--brake);margin-bottom:12px}
+.cm-actions{display:flex;gap:10px;margin-top:4px}
+.cm-actions .btn{flex:1;padding:15px;font-size:13px}
+.btn.ghost{background:transparent;color:var(--dusk);
+  box-shadow:inset 0 0 0 1px var(--hair)}
+.btn.ghost:active{transform:none;box-shadow:inset 0 0 0 1px var(--hair)}
+.cm-done{text-align:center}
+.cm-done .tick{font-family:'Bungee';font-size:34px;color:var(--grass);line-height:1}
 .dev{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:40;
   display:flex;gap:4px;padding:5px;border-radius:999px;background:rgba(18,28,39,.94);
   border:1px solid var(--hair);backdrop-filter:blur(9px);box-shadow:0 8px 26px rgba(0,0,0,.5)}
@@ -413,6 +441,36 @@ details[open] summary{color:var(--curb)}
   <p class="foot">CHICKY ROAD · Powered by KGAME99<br>Not affiliated with Telegram</p>
 </div>
 
+<div class="cr-modal" id="claimModal" hidden>
+  <div class="cr-sheet">
+    <div id="cmForm">
+      <div class="eyebrow">Claim reward</div>
+      <h3 id="cmTitle">Rank #1 · 30 Credit</h3>
+      <p>Enter the Malaysian mobile number registered with your account. Confirmation is sent to you on Telegram.</p>
+      <div class="phone-row" id="cmRow">
+        <span class="pfx">+60</span>
+        <input id="cmPhone" type="tel" inputmode="numeric" autocomplete="tel"
+               placeholder="12 345 6789" maxlength="14">
+      </div>
+      <p class="cm-err" id="cmErr"></p>
+      <div class="cm-actions">
+        <button class="btn ghost" id="cmNo">NO</button>
+        <button class="btn go" id="cmYes">YES</button>
+      </div>
+    </div>
+
+    <div id="cmDone" class="cm-done" hidden>
+      <div class="tick">✓</div>
+      <h3>Claim submitted</h3>
+      <p id="cmDoneMsg"></p>
+      <div class="cm-actions" style="margin-top:16px">
+        <button class="btn ghost" id="cmClose">CLOSE</button>
+        <button class="btn" id="cmOpenBot">OPEN BOT</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <nav class="dev" id="dev">
   <button data-s="ready" aria-pressed="true">Ready</button>
   <button data-s="cooldown" aria-pressed="false">Cooldown</button>
@@ -535,7 +593,10 @@ function boot(auto){
         bonusNum=$('bonusNum'), fill=$('fill'), walker=$('walker'), nextTier=$('nextTier'),
         link=$('link'), copyBtn=$('copyBtn'), lb=$('lb'), myTotal=$('myTotal'),
         myRank=$('myRank'), seasonLeft=$('seasonLeft'), claimCard=$('claimCard'),
-        mineRow=$('mineRow');
+        mineRow=$('mineRow'), claimModal=$('claimModal'), cmForm=$('cmForm'),
+        cmDone=$('cmDone'), cmDoneMsg=$('cmDoneMsg'), cmTitle=$('cmTitle'),
+        cmPhone=$('cmPhone'), cmErr=$('cmErr'), cmRow=$('cmRow'),
+        cmYes=$('cmYes'), cmNo=$('cmNo'), cmClose=$('cmClose'), cmOpenBot=$('cmOpenBot');
 
   const missing=Object.entries({flash,readyUI,rNum,rCap,veil,hud,tapzone,cta,liveScore,
     livesRow,seedChip,tf,bonusNum,fill,walker,nextTier,link,copyBtn,lb,myTotal,myRank,
@@ -961,13 +1022,7 @@ function renderBoard(){
       </div>`;
   }).join('');
   lb.querySelectorAll('[data-claim]:not([disabled])').forEach(b=>b.onclick=()=>{
-    const rank=+b.dataset.claim, row=BOARD_YST[rank-1]||{};
-    const tpl=CONFIG.claimApi||CONFIG.claimUrl;
-    TG.open(tpl.replace('{rank}',rank)
-               .replace('{uid}',encodeURIComponent(tgId()))
-               .replace('{user}',encodeURIComponent((row.u||'').replace(/^@/,'')))
-               .replace('{score}',row.p||0)
-               .replace('{date}',ystDate()));
+    openClaim(+b.dataset.claim, BOARD_YST[+b.dataset.claim-1]||{});
   });
   myTotal.textContent=S.myTotal||'—'; myRank.textContent=S.myRank||'—';
 }
@@ -1119,6 +1174,70 @@ TG.onViewport(measure);
    ?startapp=ref_<referrerId>. No bot webhook needed: the
    friend has to open the game anyway for the referral to
    count, so we record it right here.                        */
+/* ═══ CLAIM ════════════════════════════════════════════════
+   Malaysian mobiles are +60 followed by 1X and 7–8 more
+   digits. We store the national part without the leading 0.
+   ══════════════════════════════════════════════════════════ */
+let claimCtx=null;
+function normPhone(v){
+  let d=String(v||'').replace(/\D/g,'');
+  if(d.startsWith('60')) d=d.slice(2);
+  if(d.startsWith('0'))  d=d.slice(1);
+  return d;
+}
+const validMY=d=>/^1[0-9]{8,9}$/.test(d);
+
+function openClaim(rank,row){
+  claimCtx={rank,row,credit:CONFIG.rewards[rank-1]||0};
+  cmTitle.textContent='Rank #'+rank+' · '+claimCtx.credit+' Credit';
+  cmPhone.value=''; cmErr.textContent=''; cmRow.classList.remove('bad');
+  cmYes.disabled=false; cmYes.textContent='YES';
+  cmForm.hidden=false; cmDone.hidden=true;
+  claimModal.hidden=false;
+  setTimeout(()=>cmPhone.focus(),80);
+}
+function closeClaim(){ claimModal.hidden=true; claimCtx=null; }
+
+async function submitClaim(){
+  if(!claimCtx) return;
+  const d=normPhone(cmPhone.value);
+  if(!validMY(d)){
+    cmRow.classList.add('bad');
+    cmErr.textContent='Enter a valid Malaysian mobile, e.g. 12 345 6789';
+    return;
+  }
+  cmRow.classList.remove('bad'); cmErr.textContent='';
+  cmYes.disabled=true; cmYes.textContent='SENDING…';
+
+  const payload={
+    tg_id: tgId(),
+    tg_username: tgName(),
+    phone: d,
+    claim_date: ystDate(),
+    rank: claimCtx.rank,
+    score: claimCtx.row.p||0,
+    credit: claimCtx.credit
+  };
+
+  if(API.demo){
+    return showClaimDone('Demo mode — nothing was sent.');
+  }
+  try{
+    const r=await SB.insert('cr_claims',payload);
+    if(r.duplicate) return showClaimDone('You have already claimed this reward.');
+    showClaimDone('We will message you on Telegram once '+claimCtx.credit+
+                  ' Credit is credited to +60'+d+'.');
+  }catch(e){
+    cmYes.disabled=false; cmYes.textContent='YES';
+    cmErr.textContent=String(e.message||e).slice(0,120);
+  }
+}
+function showClaimDone(msg){
+  cmDoneMsg.textContent=msg;
+  cmForm.hidden=true; cmDone.hidden=false;
+  TG.win();
+}
+
 function paintClock(){
   seasonLeft.textContent = boardTab==='yst'
     ? 'Final · claimable'
@@ -1169,6 +1288,16 @@ if(!document.body.dataset.crLinks){
 }
 
 inviteLink=myInviteLink(); link.value=inviteLink;
+cmNo.onclick=closeClaim;
+cmClose.onclick=closeClaim;
+cmYes.onclick=submitClaim;
+cmOpenBot.onclick=()=>{ TG.openTg('https://t.me/'+CONFIG.botName); closeClaim(); };
+cmPhone.addEventListener('input',()=>{
+  cmRow.classList.remove('bad'); cmErr.textContent='';
+});
+cmPhone.addEventListener('keydown',e=>{ if(e.key==='Enter') submitClaim(); });
+claimModal.addEventListener('click',e=>{ if(e.target===claimModal) closeClaim(); });
+
 document.querySelectorAll('.lb-tab').forEach(b=>b.onclick=()=>{
   boardTab=b.dataset.tab; renderBoard(); paintClock();
 });
