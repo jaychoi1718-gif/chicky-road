@@ -508,15 +508,11 @@ const CONFIG={
   botName   : 'KRminigame_bot',
   appName   : 'chicky',                        // BotFather → /newapp short name
   claimUrl  : 'https://kgame99.com/register',
-  /* Claim endpoint. Placeholders are filled in at click time:
-     {rank} {uid} {user} {score} {date}
-     Leave empty to fall back to claimUrl.                     */
-  claimApi  : '',
   claimOwnRowOnly : true,        // false = every row's button is clickable
 
-  /* ⚠️ TESTING ONLY — set back to false before going live.
-     true  = CLAIM shows on both tabs, on every row, for anyone. */
-  claimTestMode   : true,
+  /* Testing helper. true = CLAIM appears on both tabs, on every
+     row, for anyone. MUST stay false in production.            */
+  claimTestMode   : false,
   rewards   : [30,20,10,5,5],    // Top 1 … Top 5, in Credit
   baseLives : 3,
 
