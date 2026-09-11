@@ -16,7 +16,7 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
-body{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px)) !important}
+body{padding-bottom:calc(28px + env(safe-area-inset-bottom,0px)) !important}
 body{font-family:'Barlow',system-ui,sans-serif;
   background:radial-gradient(1100px 620px at 50% -10%,#25384B 0%,transparent 62%),var(--asphalt-deep);
   color:var(--lane);min-height:100vh;display:flex;justify-content:center;
@@ -276,13 +276,6 @@ details[open] summary{color:var(--curb)}
 .btn.ghost:active{transform:none;box-shadow:inset 0 0 0 1px var(--hair)}
 .cm-done{text-align:center}
 .cm-done .tick{font-family:'Bungee';font-size:34px;color:var(--grass);line-height:1}
-.dev{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:40;
-  display:flex;gap:4px;padding:5px;border-radius:999px;background:rgba(18,28,39,.94);
-  border:1px solid var(--hair);backdrop-filter:blur(9px);box-shadow:0 8px 26px rgba(0,0,0,.5)}
-.dev button{border:0;background:none;color:var(--dusk);cursor:pointer;
-  font-family:'Barlow Semi Condensed';font-weight:600;font-size:11px;
-  letter-spacing:.07em;padding:8px 12px;border-radius:999px}
-.dev button[aria-pressed="true"]{background:var(--curb);color:var(--asphalt-deep)}
 
 .foot{text-align:center;font-size:10.5px;color:#44556A;padding:8px 0 0;line-height:1.7}
 .hidden{display:none !important}
@@ -362,16 +355,6 @@ details[open] summary{color:var(--curb)}
     </div>
   </section>
 
-  <section class="card claim hidden" id="claimCard">
-    <div class="pad">
-      <div class="eyebrow" style="color:var(--curb)">You made the board</div>
-      <h3>2nd Place</h3>
-      <p>Your <b>20 Credit</b> reward is locked in.<br>
-        A <b>3× turnover</b> is required before withdrawal.<br>
-        Unclaimed after 7 days is forfeited.</p>
-      <a class="btn" href="https://kgame99.com/register" target="_blank" rel="noopener">CLAIM NOW</a>
-    </div>
-  </section>
 
   <section class="card">
     <div class="pad" style="padding-bottom:6px"><div class="eyebrow">Terms &amp; Conditions</div></div>
@@ -473,12 +456,6 @@ details[open] summary{color:var(--curb)}
   </div>
 </div>
 
-<nav class="dev" id="dev">
-  <button data-s="ready" aria-pressed="true">Ready</button>
-  <button data-s="cooldown" aria-pressed="false">Cooldown</button>
-  <button data-s="result" aria-pressed="false">Result</button>
-  <button data-s="winner" aria-pressed="false">Winner</button>
-</nav>
 
 <script>
 /* ══════════════════════════════════════════════════════════
@@ -597,15 +574,14 @@ function boot(auto){
         liveScore=$('liveScore'), livesRow=$('livesRow'), seedChip=$('seedChip'), tf=$('tf'),
         bonusNum=$('bonusNum'), fill=$('fill'), walker=$('walker'), nextTier=$('nextTier'),
         link=$('link'), copyBtn=$('copyBtn'), lb=$('lb'), myTotal=$('myTotal'),
-        myRank=$('myRank'), seasonLeft=$('seasonLeft'), claimCard=$('claimCard'),
-        mineRow=$('mineRow'), claimModal=$('claimModal'), cmForm=$('cmForm'),
+        myRank=$('myRank'), seasonLeft=$('seasonLeft'), mineRow=$('mineRow'), claimModal=$('claimModal'), cmForm=$('cmForm'),
         cmDone=$('cmDone'), cmDoneMsg=$('cmDoneMsg'), cmTitle=$('cmTitle'),
         cmPhone=$('cmPhone'), cmErr=$('cmErr'), cmRow=$('cmRow'),
         cmYes=$('cmYes'), cmNo=$('cmNo'), cmClose=$('cmClose'), cmOpenBot=$('cmOpenBot');
 
   const missing=Object.entries({flash,readyUI,rNum,rCap,veil,hud,tapzone,cta,liveScore,
     livesRow,seedChip,tf,bonusNum,fill,walker,nextTier,link,copyBtn,lb,myTotal,myRank,
-    seasonLeft,claimCard}).filter(([,v])=>!v).map(([k])=>k);
+    seasonLeft}).filter(([,v])=>!v).map(([k])=>k);
   if(missing.length){
     console.error('[ChickyRoad] missing elements:',missing.join(', '));
     alive=false; return false;
@@ -717,7 +693,9 @@ const API={
       ]);
       const st=inv[0]||{total:0,valid:0};
       invitePending=Math.max(0,st.total-st.valid);
-      const map=a=>a.map(r=>({u:'@'+r.username,p:r.score,at:r.at,tg:r.tg_id}));
+      /* browser-only players have no Telegram identity — keep them off the board */
+      const map=a=>a.filter(r=>!String(r.tg_id).startsWith('guest-'))
+                    .map(r=>({u:'@'+r.username,p:r.score,at:r.at,tg:r.tg_id}));
       const rows=map(board), rowsY=map(yst);
       const mine=rows.findIndex(r=>r.tg===id);
       return {
@@ -1060,8 +1038,6 @@ function setState(st){
   clearInterval(cdTimer); cdTimer=null;
   running=false; resetWorld();
   veil.classList.remove('off'); hud.classList.add('off'); tapzone.classList.add('off');
-  claimCard.classList.toggle('hidden',st!=='winner');
-  document.querySelectorAll('#dev button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.s===st));
   chick.classList.add('idle');
 
   if(st==='ready'){
@@ -1082,12 +1058,6 @@ function setState(st){
     cdTimer=setInterval(()=>{const e=document.getElementById('cd');if(e)e.textContent=hms(untilMidnight());},250);
   }
   if(st==='result') showResult(47,1,'time up',52,false);
-  if(st==='winner'){
-    veil.innerHTML=`<div class="eyebrow">Yesterday's board</div>
-      <div class="clock" style="font-size:42px;color:var(--curb)">TOP 2</div>
-      <p class="hint">@you_kl · 71 lanes<br>20 Credit waiting to be claimed</p>`;
-    cta.innerHTML=`<button class="btn" disabled>TODAY'S BOARD IS LIVE</button>`;
-  }
   wireJumps();
 }
 function shareInvite(){
@@ -1173,7 +1143,6 @@ addEventListener('keydown',e=>{
 
 copyBtn.onclick=()=>{navigator.clipboard?.writeText(link.value);
   copyBtn.textContent='Copied'; setTimeout(()=>copyBtn.textContent='Copy',1400);};
-document.querySelectorAll('#dev button').forEach(b=>b.onclick=()=>setState(b.dataset.s));
 
 const houseKeeping=setInterval(()=>{
   if(!alive || !stage.isConnected){ clearInterval(houseKeeping); clearInterval(cdTimer); alive=false; return; }
