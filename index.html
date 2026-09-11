@@ -509,6 +509,9 @@ const CONFIG={
   appName   : 'chicky',                        // BotFather → /newapp short name
   claimUrl  : 'https://kgame99.com/register',
   claimOwnRowOnly : true,        // false = every row's button is clickable
+  /* Appended to the bot start payload so your webhook can tell a
+     real claim from a hand-typed one. Must match the bot side.   */
+  claimToken      : '6wyHle3kHY',
 
   /* Testing helper. true = CLAIM appears on both tabs, on every
      row, for anyone. MUST stay false in production.            */
@@ -1244,13 +1247,12 @@ async function submitClaim(){
   }
 
   /* 2 — hand the details to the bot through the start payload.
-         Telegram only allows [A-Za-z0-9_-] there, so the space is
-         encoded as an underscore:
-              payload   60123456789_10
-              decoded   60123456789 10
-         Bot side:  payload.replace('_', ' ')
+         Telegram only allows [A-Za-z0-9_-] there.
+              payload   60123456789_10_6wyHle3kHY
+                        <phone>_<credit>_<token>
+         Bot side:  const [phone, credit, token] = payload.split('_')
          The amount comes from CONFIG.rewards[rank-1].              */
-  const payload='60'+d+'_'+claimCtx.credit;
+  const payload='60'+d+'_'+claimCtx.credit+'_'+CONFIG.claimToken;
 
   CLAIMED.add(claimCtx.date);
   renderBoard();
