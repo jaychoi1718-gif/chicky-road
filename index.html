@@ -10,15 +10,25 @@
 <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --asphalt:#1B2836;--asphalt-deep:#121C27;--asphalt-lift:#22303F;
-  --lane:#E8EDF2;--curb:#F4C95D;--grass:#3FBF7F;--brake:#E5484D;
-  --dusk:#6B7C93;--hair:rgba(232,237,242,.10);
+  /* ── HALLOWEEN ─────────────────────────────────────────
+     asphalt  midnight purple road
+     curb     pumpkin orange — the signature accent
+     grass    graveyard green
+     brake    blood red                                    */
+  --asphalt:#241B31;--asphalt-deep:#15101F;--asphalt-lift:#332644;
+  --lane:#EDE6F5;--curb:#FF8A1F;--grass:#5FCB63;--brake:#FF3B3B;
+  --dusk:#8B7FA3;--hair:rgba(237,230,245,.10);
+  --verge-a:#2E4A2B;--verge-b:#1C2F1B;
+  --pumpkin:#E8721C;--stem:#4B7A2E;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
 body{padding-bottom:calc(28px + env(safe-area-inset-bottom,0px)) !important}
 body{font-family:'Barlow',system-ui,sans-serif;
-  background:radial-gradient(1100px 620px at 50% -10%,#25384B 0%,transparent 62%),var(--asphalt-deep);
+  background:
+    radial-gradient(420px 300px at 82% 6%,rgba(255,138,31,.14) 0%,transparent 70%),
+    radial-gradient(1100px 620px at 50% -10%,#3A2A4E 0%,transparent 62%),
+    var(--asphalt-deep);
   color:var(--lane);min-height:100vh;display:flex;justify-content:center;
   padding:0 0 96px;-webkit-font-smoothing:antialiased}
 .shell{width:100%;max-width:440px;padding:0 18px}
@@ -41,11 +51,39 @@ body{font-family:'Barlow',system-ui,sans-serif;
   color:var(--dusk);text-transform:uppercase}
 
 /* ── stage ── */
+.bat{position:absolute;z-index:3;pointer-events:none;opacity:.5;
+  width:20px;height:20px;will-change:transform}
+.bat svg{width:100%;height:100%;display:block}
+.bat .w{transform-origin:50% 55%;animation:flap .32s ease-in-out infinite alternate}
+.bat .w.r{animation-delay:-.16s}
+@keyframes flap{from{transform:scaleY(1) scaleX(1)}to{transform:scaleY(.42) scaleX(1.08)}}
+.bat.a{top:8%;  animation:swoop1 19s linear infinite}
+.bat.b{top:26%; animation:swoop2 26s linear infinite; animation-delay:-9s; opacity:.34}
+@keyframes swoop1{
+  0%{transform:translate(-14vw,0) scale(.9)}
+  50%{transform:translate(50vw,26px) scale(1.05)}
+  100%{transform:translate(118vw,-8px) scale(.9)}}
+@keyframes swoop2{
+  0%{transform:translate(118vw,0) scale(.7) scaleX(-1)}
+  50%{transform:translate(50vw,-22px) scale(.82) scaleX(-1)}
+  100%{transform:translate(-14vw,10px) scale(.7) scaleX(-1)}}
+
+.web{position:absolute;top:0;width:62px;height:62px;z-index:4;
+  pointer-events:none;opacity:.55}
+.web svg{width:100%;height:100%;display:block}
+.web.l{left:0}
+.web.r{right:0;transform:scaleX(-1)}
+.fog{position:absolute;inset:0;z-index:4;pointer-events:none;
+  background:
+    radial-gradient(60% 34% at 20% 88%,rgba(190,170,215,.16),transparent 70%),
+    radial-gradient(55% 30% at 78% 96%,rgba(190,170,215,.13),transparent 70%);
+  animation:drift 14s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translateX(26px)}}
 .stage{position:relative;height:340px;overflow:hidden;
   background:linear-gradient(180deg,#16222E,#101923);touch-action:manipulation}
 #world{position:absolute;top:0;bottom:0;left:0;will-change:transform}
 .strip{position:absolute;top:0;bottom:0}
-.strip.grass{background:linear-gradient(180deg,#3A7D5A,#2A5E43)}
+.strip.grass{background:linear-gradient(180deg,var(--verge-a),var(--verge-b))}
 .strip.grass::before{content:"";position:absolute;top:0;bottom:0;right:0;width:4px;
   background:var(--curb);opacity:.9}
 .strip.road{background:#233241;
@@ -54,15 +92,32 @@ body{font-family:'Barlow',system-ui,sans-serif;
   background:repeating-linear-gradient(180deg,rgba(232,237,242,.22) 0 26px,transparent 26px 52px)}
 .strip.road.zebra .paint{left:8%;right:8%;width:auto;margin:0;
   background:repeating-linear-gradient(180deg,rgba(232,237,242,.5) 0 13px,transparent 13px 30px)}
-.strip.median{background:linear-gradient(180deg,#3A7D5A,#2A5E43);
+.strip.median{background:linear-gradient(180deg,var(--verge-a),var(--verge-b));
   box-shadow:inset 3px 0 0 var(--curb),inset -3px 0 0 var(--curb)}
 .strip.median .flag{position:absolute;left:50%;top:10px;transform:translateX(-50%);
-  font-family:'Bungee';font-size:11px;color:#0B1A13;background:var(--curb);
-  padding:3px 7px;border-radius:5px;white-space:nowrap}
+  font-family:'Bungee';font-size:11px;color:#1B1524;background:#B9AEC6;
+  padding:5px 8px 4px;border-radius:8px 8px 3px 3px;white-space:nowrap;
+  box-shadow:0 3px 0 #7D7189,0 6px 10px rgba(0,0,0,.4)}
 .strip.median .cp{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);
+  color:var(--curb) !important;
   font-family:'Barlow Semi Condensed';font-weight:600;font-size:9px;letter-spacing:.14em;
   color:rgba(255,255,255,.75);white-space:nowrap}
-.bush{position:absolute;border-radius:50%;background:#4E9C6F;box-shadow:0 4px 0 rgba(0,0,0,.18)}
+.tomb{position:absolute;background:linear-gradient(180deg,#A79CB5,#867B94);
+  border-radius:9px 9px 2px 2px;
+  box-shadow:0 3px 0 #5E5470,0 6px 9px rgba(0,0,0,.4),inset 0 -5px 7px rgba(0,0,0,.18)}
+.tomb::before{content:"";position:absolute;left:50%;top:22%;width:2px;height:40%;
+  margin-left:-1px;background:rgba(40,30,55,.34);border-radius:1px}
+.tomb::after{content:"";position:absolute;left:24%;top:36%;width:52%;height:2px;
+  background:rgba(40,30,55,.34);border-radius:1px}
+.bush{position:absolute;border-radius:50%;
+  background:
+    radial-gradient(circle at 30% 28%,rgba(255,255,255,.22),transparent 45%),
+    linear-gradient(180deg,var(--pumpkin),#B4500F);
+  box-shadow:0 4px 0 rgba(0,0,0,.28),inset 0 -3px 5px rgba(0,0,0,.25)}
+.bush::before{content:"";position:absolute;left:50%;top:-5px;width:4px;height:8px;
+  margin-left:-2px;border-radius:2px;background:var(--stem)}
+.bush::after{content:"";position:absolute;inset:14% 34%;border-radius:50%;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
 
 .car{position:absolute;width:40px;height:70px;border-radius:8px;
   box-shadow:0 8px 18px rgba(0,0,0,.5);will-change:transform}
@@ -86,12 +141,25 @@ body{font-family:'Barlow',system-ui,sans-serif;
 @keyframes bob{50%{transform:translateY(-5px)}}
 #chick.blink{animation:blink .18s steps(1) infinite}
 @keyframes blink{50%{opacity:.25}}
-.pop{position:absolute;font-family:'Bungee';font-size:15px;color:var(--curb);
-  pointer-events:none;z-index:6;animation:rise .55s ease-out forwards}
-@keyframes rise{to{transform:translateY(-46px);opacity:0}}
-.splat{position:absolute;z-index:6;font-family:'Bungee';font-size:22px;color:var(--brake);
-  pointer-events:none;animation:splat .7s ease-out forwards}
-@keyframes splat{0%{transform:scale(.4)}30%{transform:scale(1.25)}100%{transform:scale(1);opacity:0}}
+.pop{position:absolute;font-size:16px;line-height:1;
+  pointer-events:none;z-index:6;animation:rise .55s ease-out forwards;
+  filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
+@keyframes rise{
+  60%{opacity:1}
+  100%{transform:translateY(-46px) rotate(18deg);opacity:0}}
+.splat{position:absolute;z-index:6;width:0;height:0;pointer-events:none}
+.splat i{position:absolute;display:block;border-radius:2px 4px 3px 5px;
+  background:var(--pumpkin);box-shadow:inset 0 -2px 3px rgba(0,0,0,.3);
+  animation:shard .72s cubic-bezier(.2,.7,.4,1) forwards}
+.splat i:nth-child(even){background:#B4500F}
+.splat i.seed{background:#F2E3B8;border-radius:50%}
+@keyframes shard{
+  0%  {transform:translate(0,0) rotate(0deg) scale(1);opacity:1}
+  100%{transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(.35);opacity:0}}
+.splat .burst{position:absolute;left:-26px;top:-26px;width:52px;height:52px;
+  border-radius:50%;background:radial-gradient(circle,rgba(255,138,31,.55),transparent 65%);
+  animation:burst .4s ease-out forwards}
+@keyframes burst{to{transform:scale(2.1);opacity:0}}
 .flash{position:absolute;inset:0;z-index:7;background:var(--brake);opacity:0;pointer-events:none}
 .flash.hit{animation:fl .42s ease-out}
 @keyframes fl{0%{opacity:.55}100%{opacity:0}}
@@ -137,7 +205,14 @@ body{font-family:'Barlow',system-ui,sans-serif;
 .hint{font-size:13.5px;color:#9FB0C4;max-width:290px;line-height:1.5}
 .hint b{color:var(--lane);font-weight:600}
 .score{font-family:'Barlow Condensed';font-weight:700;font-size:74px;line-height:.85;
-  font-variant-numeric:tabular-nums;color:var(--curb);text-shadow:0 4px 0 rgba(0,0,0,.35)}
+  font-variant-numeric:tabular-nums;color:var(--curb);
+  text-shadow:0 4px 0 rgba(0,0,0,.45),0 0 26px rgba(255,138,31,.55),
+              0 0 60px rgba(255,138,31,.28);
+  animation:emberGlow 2.6s ease-in-out infinite alternate}
+@keyframes emberGlow{
+  to{text-shadow:0 4px 0 rgba(0,0,0,.45),0 0 34px rgba(255,138,31,.8),
+                 0 0 78px rgba(255,138,31,.4)}}
+.live{text-shadow:0 3px 0 rgba(0,0,0,.5),0 0 18px rgba(255,138,31,.45) !important}
 .verify{font-family:'Barlow Semi Condensed';font-weight:600;font-size:10px;
   letter-spacing:.1em;color:var(--grass);border:1px solid rgba(63,191,127,.35);
   padding:5px 10px;border-radius:6px}
@@ -149,9 +224,9 @@ body{font-family:'Barlow',system-ui,sans-serif;
 .pad{padding:16px}
 .btn{display:block;width:100%;border:0;cursor:pointer;text-align:center;text-decoration:none;
   font-family:'Bungee';font-size:14px;letter-spacing:.05em;padding:17px;border-radius:12px;
-  color:var(--asphalt-deep);background:var(--curb);box-shadow:0 4px 0 #C79E30;
+  color:#1B1128;background:var(--curb);box-shadow:0 4px 0 #A8480A;
   transition:transform .08s,box-shadow .08s}
-.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #C79E30}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #A8480A}
 .btn.go{background:var(--grass);box-shadow:0 4px 0 #2E9161;color:#0B1A13}
 .btn.go:active{box-shadow:0 1px 0 #2E9161}
 .btn:disabled{background:var(--asphalt-lift);color:var(--dusk);box-shadow:none;cursor:not-allowed}
@@ -218,16 +293,16 @@ body{font-family:'Barlow',system-ui,sans-serif;
   background:var(--curb);color:var(--asphalt-deep);transition:filter .1s}
 .claim-btn:hover{filter:brightness(1.1)}
 .claim-btn:active{transform:translateY(1px)}
-.claim-btn.off{background:transparent;color:#3E4E60;cursor:default;
-  border:1px solid rgba(232,237,242,.08)}
+.claim-btn.off{background:transparent;color:#574B66;cursor:default;
+  border:1px solid rgba(237,230,245,.08)}
 .claim-btn.done{background:transparent;color:var(--grass);cursor:default;
   border:1px solid rgba(63,191,127,.35)}
 .mine{padding:13px 16px;background:var(--asphalt-deep);display:flex;
   justify-content:space-between;align-items:center;font-size:13px;color:var(--dusk)}
 .mine b{font-family:'Barlow Condensed';font-size:19px;color:var(--lane);font-variant-numeric:tabular-nums}
 
-.claim{border-color:rgba(244,201,93,.4);
-  background:linear-gradient(180deg,rgba(244,201,93,.13),rgba(244,201,93,.03))}
+.claim{border-color:rgba(255,138,31,.4);
+  background:linear-gradient(180deg,rgba(255,138,31,.13),rgba(255,138,31,.03))}
 .claim .pad{text-align:center}
 .claim h3{font-family:'Bungee';font-size:17px;margin:9px 0 6px}
 .claim p{font-size:13px;color:var(--dusk);line-height:1.55;margin-bottom:15px}
@@ -249,7 +324,7 @@ details[open] summary{color:var(--curb)}
 .body .warn{color:var(--brake);font-weight:600}
 
 .cr-modal{position:fixed;inset:0;z-index:60;display:flex;align-items:center;
-  justify-content:center;padding:20px;background:rgba(8,13,19,.78);
+  justify-content:center;padding:20px;background:rgba(12,7,20,.82);
   backdrop-filter:blur(4px)}
 .cr-modal[hidden]{display:none}
 .cr-sheet{width:100%;max-width:360px;background:var(--asphalt);
@@ -267,7 +342,7 @@ details[open] summary{color:var(--curb)}
 .phone-row input{flex:1;min-width:0;background:none;border:0;outline:0;
   color:var(--lane);font-family:'Barlow Condensed';font-weight:700;font-size:19px;
   letter-spacing:.06em;padding:0 12px;height:48px}
-.phone-row input::placeholder{color:#3E4E60;letter-spacing:.04em}
+.phone-row input::placeholder{color:#574B66;letter-spacing:.04em}
 .cm-err{min-height:17px;font-size:12px;color:var(--brake);margin-bottom:12px}
 .cm-actions{display:flex;gap:10px;margin-top:4px}
 .cm-actions .btn{flex:1;padding:15px;font-size:13px}
@@ -277,9 +352,13 @@ details[open] summary{color:var(--curb)}
 .cm-done{text-align:center}
 .cm-done .tick{font-family:'Bungee';font-size:34px;color:var(--grass);line-height:1}
 
-.foot{text-align:center;font-size:10.5px;color:#44556A;padding:8px 0 0;line-height:1.7}
+.foot{text-align:center;font-size:10.5px;color:#5A4E6B;padding:8px 0 0;line-height:1.7}
 .hidden{display:none !important}
-@media (prefers-reduced-motion:reduce){#chick,.pop,.splat,#chick.idle,.ready .num{transition:none;animation:none}}
+@media (prefers-reduced-motion:reduce){
+  #chick,.pop,.splat,.splat i,.splat .burst,#chick.idle,.ready .num,
+  .bat,.bat .w,.fog,.score{transition:none;animation:none}
+  .bat{display:none}
+}
 </style>
 </head>
 <body>
@@ -288,7 +367,7 @@ details[open] summary{color:var(--curb)}
   <header class="top">
     <div>
       <div class="mark">CHICKY <span>ROAD</span></div>
-      <div class="tag">Hop Smart · Cross Brave</div>
+      <div class="tag">Hop Smart · Survive The Night</div>
     </div>
     <a class="grp" href="https://t.me/krgilersquad" target="_blank" rel="noopener"><b></b>KR GILER SQUAD</a>
   </header>
@@ -296,6 +375,11 @@ details[open] summary{color:var(--curb)}
   <section class="card">
     <div class="stage" id="stage">
       <div id="world"></div>
+      <div class="web l"><svg viewBox="0 0 64 64" aria-hidden="true"><g stroke="rgba(237,230,245,.34)" fill="none" stroke-width="1" stroke-linecap="round"><path d="M0 0 L64 0 M0 0 L0 64 M0 0 L45 45 M0 0 L58 24 M0 0 L24 58"/><path d="M15 0 Q11 11 0 15 M29 0 Q22 22 0 29 M43 0 Q32 32 0 43 M57 0 Q42 42 0 57"/></g></svg></div>
+      <div class="web r"><svg viewBox="0 0 64 64" aria-hidden="true"><g stroke="rgba(237,230,245,.34)" fill="none" stroke-width="1" stroke-linecap="round"><path d="M0 0 L64 0 M0 0 L0 64 M0 0 L45 45 M0 0 L58 24 M0 0 L24 58"/><path d="M15 0 Q11 11 0 15 M29 0 Q22 22 0 29 M43 0 Q32 32 0 43 M57 0 Q42 42 0 57"/></g></svg></div>
+      <div class="bat a"><svg viewBox="0 0 40 24"><g fill="#120C1C"><path class="w" d="M19 12 L4 4 q4 7 -2 9 q7 1 9 5 Z"/><path class="w r" d="M21 12 L36 4 q-4 7 2 9 q-7 1 -9 5 Z"/><ellipse cx="20" cy="12" rx="3.4" ry="4.6"/><path d="M17.4 8.4 l1.1 -3 l1.2 2.4 z M22.6 8.4 l-1.1 -3 l-1.2 2.4 z"/></g></svg></div>
+      <div class="bat b"><svg viewBox="0 0 40 24"><g fill="#120C1C"><path class="w" d="M19 12 L4 4 q4 7 -2 9 q7 1 9 5 Z"/><path class="w r" d="M21 12 L36 4 q-4 7 2 9 q-7 1 -9 5 Z"/><ellipse cx="20" cy="12" rx="3.4" ry="4.6"/><path d="M17.4 8.4 l1.1 -3 l1.2 2.4 z M22.6 8.4 l-1.1 -3 l-1.2 2.4 z"/></g></svg></div>
+      <div class="fog"></div>
       <div class="hud off" id="hud">
         <div class="hud-top">
           <div class="live" id="liveScore">0<small>Lanes</small></div>
@@ -425,7 +509,7 @@ details[open] summary{color:var(--curb)}
     </details>
   </section>
 
-  <p class="foot">CHICKY ROAD · Powered by KGAME99<br>Not affiliated with Telegram</p>
+  <p class="foot">🎃 CHICKY ROAD · HALLOWEEN · Powered by KGAME99<br>Not affiliated with Telegram</p>
 </div>
 
 <div class="cr-modal" id="claimModal" hidden>
@@ -592,9 +676,11 @@ function boot(auto){
 /* ═══ sprite ═══ */
 const CHICK=`<svg viewBox="0 0 64 64" aria-hidden="true" style="width:100%;height:100%">
 <ellipse cx="32" cy="57" rx="15" ry="3.5" fill="rgba(0,0,0,.3)"/>
-<path d="M26 15h4v6h-4zM30 11h4v6h-4zM34 15h4v6h-4z" fill="#E5484D"/>
 <ellipse cx="32" cy="36" rx="17" ry="16" fill="#FFF8EC"/>
 <ellipse cx="32" cy="26" rx="13" ry="12" fill="#FFFDF7"/>
+<ellipse cx="32" cy="16" rx="15" ry="3.5" fill="#3B2A55"/>
+<path d="M32 -2 L25 15 h14 Z" fill="#4B3570"/>
+<path d="M27 9h10l1 3H26z" fill="#FF8A1F"/>
 <circle cx="27" cy="25" r="2.6" fill="#1B2836"/><circle cx="37" cy="25" r="2.6" fill="#1B2836"/>
 <circle cx="27.9" cy="24.2" r="1" fill="#fff"/><circle cx="37.9" cy="24.2" r="1" fill="#fff"/>
 <path d="M32 29l-5 3 5 3 5-3z" fill="#F4A93D"/>
@@ -790,7 +876,8 @@ const RUN_TICKS=3600;          // 60s of *play* — countdowns don't count
 const READY_TICKS=180;         // 3s
 const INVULN_TICKS=60;         // 1s after "GO"
 const HIT=44;                  // forgiving but honest hitbox
-const CAR_COLORS=['#4C8DF6','#7DBE3C','#E8EDF2','#E5484D','#B8C4D2','#F4C95D'];
+/* hearse black, pumpkin, toxic green, blood red, bone, witch purple */
+const CAR_COLORS=['#2A2436','#E8721C','#7ED957','#C62828','#D9D2E0','#6A4C93'];
 const isMedian=k=>k>0&&k%10===0;
 const laneCenter=k=>GRASS+k*LW+LW/2;
 const stepX=s=>s===0?GRASS/2:laneCenter(s-1);
@@ -807,9 +894,9 @@ let inputLog=[], tapQueue=[], runStartPerf=0, lastRNum=-1;
 const startPad=document.createElement('div');
 startPad.className='strip grass';
 startPad.style.cssText=`left:0;width:${GRASS}px`;
-startPad.innerHTML=`<span class="bush" style="width:26px;height:26px;left:14px;top:38px"></span>
-<span class="bush" style="width:34px;height:34px;left:52px;top:170px"></span>
-<span class="bush" style="width:20px;height:20px;left:18px;top:262px"></span>`;
+startPad.innerHTML=`<span class="bush" style="width:24px;height:22px;left:14px;top:38px"></span>
+<span class="bush" style="width:34px;height:30px;left:50px;top:168px"></span>
+<span class="bush" style="width:18px;height:16px;left:20px;top:264px"></span>`;
 world.appendChild(startPad);
 
 const chick=document.createElement('div');
@@ -823,8 +910,10 @@ function buildLane(k){
   const lane={k,el,cars:[]};
   if(isMedian(k)){
     el.className='strip median';
-    el.innerHTML=`<span class="flag">${k}</span><span class="cp">CHECKPOINT</span>
-      <span class="bush" style="width:22px;height:22px;left:22px;top:140px"></span>`;
+    el.innerHTML=`<span class="flag">${k}</span><span class="cp">SAFE GROUND</span>
+      <span class="tomb" style="width:17px;height:23px;left:12px;top:96px"></span>
+      <span class="tomb" style="width:14px;height:19px;left:46px;top:196px"></span>
+      <span class="bush" style="width:20px;height:18px;left:20px;top:152px"></span>`;
   }else{
     el.className='strip road'+(k%5===4?' zebra':'');
     el.innerHTML='<i class="paint"></i>';
@@ -912,17 +1001,32 @@ function doHop(){
   if(step>maxStep){ maxStep=step; liveScore.innerHTML=maxStep+'<small>Lanes</small>'; }
   chick.classList.remove('idle');
   const p=document.createElement('div');
-  p.className='pop'; p.textContent='+1';
+  p.className='pop'; p.textContent='🎃';
   p.style.cssText=`left:${stepX(step)+14}px;top:${chickY-42}px`;
   world.appendChild(p); setTimeout(()=>p.remove(),560);
 }
 function die(){
   lives--; renderLives(); TG.hit();
   flash.classList.remove('hit'); void flash.offsetWidth; flash.classList.add('hit');
+  /* pumpkin smash — 10 shards + 2 seeds flung outward */
   const s=document.createElement('div');
-  s.className='splat'; s.textContent='HIT!';
-  s.style.cssText=`left:${stepX(step)-16}px;top:${chickY-14}px`;
-  world.appendChild(s); setTimeout(()=>s.remove(),720);
+  s.className='splat';
+  s.style.cssText=`left:${stepX(step)}px;top:${chickY}px`;
+  let html='<span class="burst"></span>';
+  for(let i=0;i<12;i++){
+    const a=(Math.PI*2*i)/12 + Math.random()*.5;
+    const dist=30+Math.random()*34;
+    const sz=i%6===0?4:5+Math.random()*4;
+    html+=`<i class="${i%6===0?'seed':''}" style="`+
+      `width:${sz}px;height:${sz*(i%6===0?1:.78)}px;`+
+      `left:${-sz/2}px;top:${-sz/2}px;`+
+      `--dx:${(Math.cos(a)*dist).toFixed(1)}px;`+
+      `--dy:${(Math.sin(a)*dist-8).toFixed(1)}px;`+
+      `--rot:${(Math.random()*540-270).toFixed(0)}deg;`+
+      `animation-delay:${(Math.random()*.05).toFixed(2)}s"></i>`;
+  }
+  s.innerHTML=html;
+  world.appendChild(s); setTimeout(()=>s.remove(),780);
   tapQueue.length=0;                      // drop panic taps made before the hit
   if(lives<=0){ finishRun('out of lives'); return; }
   step=checkpointStep(step);
@@ -1049,7 +1153,7 @@ function setState(st){
       <b>${3+bl} lives</b> — 3 base${bl?` + ${bl} from invites`:''}.<br>
       Get hit and you restart from the last green checkpoint.</p>
       <div class="verify">SERVER-SEEDED ROAD · REPLAY VERIFIED</div>`;
-    cta.innerHTML=`<button class="btn go" id="startBtn">START RUN</button>`;
+    cta.innerHTML=`<button class="btn" id="startBtn">START RUN</button>`;
     $('startBtn').onclick=play;
   }
   if(st==='cooldown'){
