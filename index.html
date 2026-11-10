@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Chicky Road</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* ── HALLOWEEN ─────────────────────────────────────────
+     asphalt  midnight purple road
+     curb     pumpkin orange — the signature accent
+     grass    graveyard green
+     brake    blood red                                    */
+  --asphalt:#241B31;--asphalt-deep:#15101F;--asphalt-lift:#332644;
+  --lane:#EDE6F5;--curb:#FF8A1F;--grass:#5FCB63;--brake:#FF3B3B;
+  --dusk:#8B7FA3;--hair:rgba(237,230,245,.10);
+  --verge-a:#2E4A2B;--verge-b:#1C2F1B;
+  --pumpkin:#E8721C;--stem:#4B7A2E;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{padding-bottom:calc(28px + env(safe-area-inset-bottom,0px)) !important}
+body{font-family:'Barlow',system-ui,sans-serif;
+  background:
+    radial-gradient(420px 300px at 82% 6%,rgba(255,138,31,.14) 0%,transparent 70%),
+    radial-gradient(1100px 620px at 50% -10%,#3A2A4E 0%,transparent 62%),
+    var(--asphalt-deep);
+  color:var(--lane);min-height:100vh;display:flex;justify-content:center;
+  padding:0 0 96px;-webkit-font-smoothing:antialiased}
+.shell{width:100%;max-width:440px;padding:0 18px}
+
+.top{display:flex;align-items:center;justify-content:space-between;padding:20px 0 16px}
+.mark{font-family:'Bungee';font-size:19px;line-height:1}
+.mark span{color:var(--curb)}
+.tag{font-family:'Barlow Condensed';font-weight:600;font-size:10px;
+  letter-spacing:.34em;color:var(--dusk);margin-top:5px;text-transform:uppercase}
+.grp{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--hair);
+  border-radius:999px;padding:7px 12px;background:rgba(232,237,242,.03);
+  font-family:'Barlow Semi Condensed';font-weight:600;font-size:12px;
+  color:var(--lane);text-decoration:none;letter-spacing:.04em}
+.grp:hover{border-color:var(--grass);color:var(--grass)}
+.grp b{width:6px;height:6px;border-radius:50%;background:var(--grass)}
+
+.card{background:var(--asphalt);border:1px solid var(--hair);
+  border-radius:16px;overflow:hidden;margin-bottom:14px}
+.eyebrow{font-family:'Bungee';font-size:9.5px;letter-spacing:.2em;
+  color:var(--dusk);text-transform:uppercase}
+
+/* ── stage ── */
+.bat{position:absolute;z-index:3;pointer-events:none;opacity:.5;
+  width:20px;height:20px;will-change:transform}
+.bat svg{width:100%;height:100%;display:block}
+.bat .w{transform-origin:50% 55%;animation:flap .32s ease-in-out infinite alternate}
+.bat .w.r{animation-delay:-.16s}
+@keyframes flap{from{transform:scaleY(1) scaleX(1)}to{transform:scaleY(.42) scaleX(1.08)}}
+.bat.a{top:8%;  animation:swoop1 19s linear infinite}
+.bat.b{top:26%; animation:swoop2 26s linear infinite; animation-delay:-9s; opacity:.34}
+@keyframes swoop1{
+  0%{transform:translate(-14vw,0) scale(.9)}
+  50%{transform:translate(50vw,26px) scale(1.05)}
+  100%{transform:translate(118vw,-8px) scale(.9)}}
+@keyframes swoop2{
+  0%{transform:translate(118vw,0) scale(.7) scaleX(-1)}
+  50%{transform:translate(50vw,-22px) scale(.82) scaleX(-1)}
+  100%{transform:translate(-14vw,10px) scale(.7) scaleX(-1)}}
+
+.web{position:absolute;top:0;width:62px;height:62px;z-index:4;
+  pointer-events:none;opacity:.55}
+.web svg{width:100%;height:100%;display:block}
+.web.l{left:0}
+.web.r{right:0;transform:scaleX(-1)}
+.fog{position:absolute;inset:0;z-index:4;pointer-events:none;
+  background:
+    radial-gradient(60% 34% at 20% 88%,rgba(190,170,215,.16),transparent 70%),
+    radial-gradient(55% 30% at 78% 96%,rgba(190,170,215,.13),transparent 70%);
+  animation:drift 14s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translateX(26px)}}
+.stage{position:relative;height:340px;overflow:hidden;
+  background:linear-gradient(180deg,#16222E,#101923);touch-action:manipulation}
+#world{position:absolute;top:0;bottom:0;left:0;will-change:transform}
+.strip{position:absolute;top:0;bottom:0}
+.strip.grass{background:linear-gradient(180deg,var(--verge-a),var(--verge-b))}
+.strip.grass::before{content:"";position:absolute;top:0;bottom:0;right:0;width:4px;
+  background:var(--curb);opacity:.9}
+.strip.road{background:#233241;
+  box-shadow:inset 1px 0 0 rgba(232,237,242,.09),inset -1px 0 0 rgba(0,0,0,.25)}
+.strip.road .paint{position:absolute;left:50%;top:0;bottom:0;width:3px;margin-left:-1.5px;
+  background:repeating-linear-gradient(180deg,rgba(232,237,242,.22) 0 26px,transparent 26px 52px)}
+.strip.road.zebra .paint{left:8%;right:8%;width:auto;margin:0;
+  background:repeating-linear-gradient(180deg,rgba(232,237,242,.5) 0 13px,transparent 13px 30px)}
+.strip.median{background:linear-gradient(180deg,var(--verge-a),var(--verge-b));
+  box-shadow:inset 3px 0 0 var(--curb),inset -3px 0 0 var(--curb)}
+.strip.median .flag{position:absolute;left:50%;top:10px;transform:translateX(-50%);
+  font-family:'Bungee';font-size:11px;color:#1B1524;background:#B9AEC6;
+  padding:5px 8px 4px;border-radius:8px 8px 3px 3px;white-space:nowrap;
+  box-shadow:0 3px 0 #7D7189,0 6px 10px rgba(0,0,0,.4)}
+.strip.median .cp{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);
+  color:var(--curb) !important;
+  font-family:'Barlow Semi Condensed';font-weight:600;font-size:9px;letter-spacing:.14em;
+  color:rgba(255,255,255,.75);white-space:nowrap}
+.tomb{position:absolute;background:linear-gradient(180deg,#A79CB5,#867B94);
+  border-radius:9px 9px 2px 2px;
+  box-shadow:0 3px 0 #5E5470,0 6px 9px rgba(0,0,0,.4),inset 0 -5px 7px rgba(0,0,0,.18)}
+.tomb::before{content:"";position:absolute;left:50%;top:22%;width:2px;height:40%;
+  margin-left:-1px;background:rgba(40,30,55,.34);border-radius:1px}
+.tomb::after{content:"";position:absolute;left:24%;top:36%;width:52%;height:2px;
+  background:rgba(40,30,55,.34);border-radius:1px}
+.bush{position:absolute;border-radius:50%;
+  background:
+    radial-gradient(circle at 30% 28%,rgba(255,255,255,.22),transparent 45%),
+    linear-gradient(180deg,var(--pumpkin),#B4500F);
+  box-shadow:0 4px 0 rgba(0,0,0,.28),inset 0 -3px 5px rgba(0,0,0,.25)}
+.bush::before{content:"";position:absolute;left:50%;top:-5px;width:4px;height:8px;
+  margin-left:-2px;border-radius:2px;background:var(--stem)}
+.bush::after{content:"";position:absolute;inset:14% 34%;border-radius:50%;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
+
+.car{position:absolute;width:40px;height:70px;border-radius:8px;
+  box-shadow:0 8px 18px rgba(0,0,0,.5);will-change:transform}
+.car .glass{position:absolute;left:5px;right:5px;height:15px;border-radius:4px;background:rgba(10,18,26,.45)}
+.car .glass.a{top:11px}.car .glass.b{bottom:11px}
+.car .roof{position:absolute;left:9px;right:9px;top:32px;height:8px;border-radius:3px;background:rgba(0,0,0,.16)}
+.car .lamp{position:absolute;width:9px;height:5px;border-radius:3px;background:#FFF3C4;
+  box-shadow:0 0 11px 3px rgba(255,240,180,.55);opacity:.9}
+.car .lamp.l{left:4px}.car .lamp.r{right:4px}
+.car.down .lamp{bottom:2px}.car.up .lamp{top:2px}
+.car .tail{position:absolute;width:9px;height:4px;border-radius:3px;background:#7A2226;
+  opacity:.7;transition:background .1s,box-shadow .1s,opacity .1s}
+.car .tail.l{left:4px}.car .tail.r{right:4px}
+.car.down .tail{top:2px}.car.up .tail{bottom:2px}
+.car.braking .tail{background:var(--brake);opacity:1;box-shadow:0 0 12px 3px rgba(229,72,77,.75)}
+
+#chick{position:absolute;width:56px;height:56px;margin:-28px 0 0 -28px;
+  transition:transform .08s cubic-bezier(.34,1.5,.5,1);z-index:5;
+  filter:drop-shadow(0 9px 7px rgba(0,0,0,.5))}
+#chick.idle{animation:bob 1.9s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-5px)}}
+#chick.blink{animation:blink .18s steps(1) infinite}
+@keyframes blink{50%{opacity:.25}}
+.pop{position:absolute;font-size:16px;line-height:1;
+  pointer-events:none;z-index:6;animation:rise .55s ease-out forwards;
+  filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
+@keyframes rise{
+  60%{opacity:1}
+  100%{transform:translateY(-46px) rotate(18deg);opacity:0}}
+.splat{position:absolute;z-index:6;width:0;height:0;pointer-events:none}
+.splat i{position:absolute;display:block;border-radius:2px 4px 3px 5px;
+  background:var(--pumpkin);box-shadow:inset 0 -2px 3px rgba(0,0,0,.3);
+  animation:shard .72s cubic-bezier(.2,.7,.4,1) forwards}
+.splat i:nth-child(even){background:#B4500F}
+.splat i.seed{background:#F2E3B8;border-radius:50%}
+@keyframes shard{
+  0%  {transform:translate(0,0) rotate(0deg) scale(1);opacity:1}
+  100%{transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(.35);opacity:0}}
+.splat .burst{position:absolute;left:-26px;top:-26px;width:52px;height:52px;
+  border-radius:50%;background:radial-gradient(circle,rgba(255,138,31,.55),transparent 65%);
+  animation:burst .4s ease-out forwards}
+@keyframes burst{to{transform:scale(2.1);opacity:0}}
+.flash{position:absolute;inset:0;z-index:7;background:var(--brake);opacity:0;pointer-events:none}
+.flash.hit{animation:fl .42s ease-out}
+@keyframes fl{0%{opacity:.55}100%{opacity:0}}
+
+/* ready countdown */
+.ready{position:absolute;inset:0;z-index:8;display:none;pointer-events:none;
+  flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.ready.on{display:flex}
+.ready .num{font-family:'Bungee';font-size:76px;line-height:1;color:var(--curb);
+  text-shadow:0 5px 0 rgba(0,0,0,.5)}
+.ready .num.go{color:var(--grass)}
+.ready .cap{font-family:'Barlow Semi Condensed';font-weight:600;font-size:11px;
+  letter-spacing:.22em;color:rgba(232,237,242,.8);background:rgba(0,0,0,.5);
+  padding:5px 12px;border-radius:6px;text-transform:uppercase}
+.ready .num.beat{animation:beat .35s ease-out}
+@keyframes beat{0%{transform:scale(1.5);opacity:.2}100%{transform:scale(1);opacity:1}}
+
+.veil{position:absolute;inset:0;z-index:9;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:11px;padding:22px;text-align:center;
+  background:linear-gradient(180deg,rgba(16,25,35,.55),rgba(16,25,35,.9))}
+.veil.off{display:none}
+.hud{position:absolute;inset:0;z-index:6;pointer-events:none;
+  display:flex;flex-direction:column;justify-content:space-between;padding:14px}
+.hud.off{display:none}
+.hud-top{display:flex;align-items:flex-start;justify-content:space-between}
+.live{font-family:'Barlow Condensed';font-weight:700;font-size:52px;line-height:.85;
+  color:var(--curb);font-variant-numeric:tabular-nums;text-shadow:0 3px 0 rgba(0,0,0,.5)}
+.live small{display:block;font-family:'Bungee';font-size:8.5px;letter-spacing:.2em;
+  color:rgba(232,237,242,.65);text-shadow:none;margin-top:4px}
+.hud-right{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.lives{display:flex;gap:4px}
+.lives i{width:17px;height:17px;display:block;opacity:.22;background:no-repeat center/contain}
+.lives i.on{opacity:1;filter:drop-shadow(0 2px 2px rgba(0,0,0,.5))}
+.chip{font-family:'Barlow Semi Condensed';font-weight:600;font-size:10px;letter-spacing:.1em;
+  color:rgba(232,237,242,.6);background:rgba(0,0,0,.4);padding:4px 8px;border-radius:6px}
+.timer-bar{height:5px;border-radius:3px;background:rgba(0,0,0,.45);overflow:hidden}
+.timer-fill{height:100%;background:var(--grass);width:100%}
+.timer-fill.warn{background:var(--brake)}
+.timer-fill.hold{background:var(--curb);opacity:.55}
+
+.clock{font-family:'Barlow Condensed';font-weight:700;font-size:58px;line-height:.9;
+  font-variant-numeric:tabular-nums}
+.hint{font-size:13.5px;color:#9FB0C4;max-width:290px;line-height:1.5}
+.hint b{color:var(--lane);font-weight:600}
+.score{font-family:'Barlow Condensed';font-weight:700;font-size:74px;line-height:.85;
+  font-variant-numeric:tabular-nums;color:var(--curb);
+  text-shadow:0 4px 0 rgba(0,0,0,.45),0 0 26px rgba(255,138,31,.55),
+              0 0 60px rgba(255,138,31,.28);
+  animation:emberGlow 2.6s ease-in-out infinite alternate}
+@keyframes emberGlow{
+  to{text-shadow:0 4px 0 rgba(0,0,0,.45),0 0 34px rgba(255,138,31,.8),
+                 0 0 78px rgba(255,138,31,.4)}}
+.live{text-shadow:0 3px 0 rgba(0,0,0,.5),0 0 18px rgba(255,138,31,.45) !important}
+.verify{font-family:'Barlow Semi Condensed';font-weight:600;font-size:10px;
+  letter-spacing:.1em;color:var(--grass);border:1px solid rgba(63,191,127,.35);
+  padding:5px 10px;border-radius:6px}
+.tapzone{position:absolute;inset:0;z-index:10;background:transparent;border:0;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.tapzone.off{display:none}
+.tapzone:focus-visible{outline:3px solid var(--curb);outline-offset:-3px}
+
+.pad{padding:16px}
+.btn{display:block;width:100%;border:0;cursor:pointer;text-align:center;text-decoration:none;
+  font-family:'Bungee';font-size:14px;letter-spacing:.05em;padding:17px;border-radius:12px;
+  color:#1B1128;background:var(--curb);box-shadow:0 4px 0 #A8480A;
+  transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #A8480A}
+.btn.go{background:var(--grass);box-shadow:0 4px 0 #2E9161;color:#0B1A13}
+.btn.go:active{box-shadow:0 1px 0 #2E9161}
+.btn:disabled{background:var(--asphalt-lift);color:var(--dusk);box-shadow:none;cursor:not-allowed}
+.btn:focus-visible{outline:3px solid var(--lane);outline-offset:3px}
+.linkish{background:none;border:0;color:var(--dusk);font-size:12.5px;
+  text-decoration:underline;cursor:pointer;padding:10px;font-family:'Barlow'}
+
+.rowtop{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:3px}
+.bonus{font-family:'Barlow Condensed';font-weight:700;font-size:26px;color:var(--grass)}
+.track{position:relative;height:44px;border-radius:8px;margin:14px 0 10px;
+  background:var(--asphalt-deep);overflow:hidden;border:1px solid var(--hair)}
+.track::before,.track::after{content:"";position:absolute;left:0;right:0;height:2px;background:var(--curb);opacity:.5}
+.track::before{top:0}.track::after{bottom:0}
+.zbr{position:absolute;top:0;bottom:0;width:15px;
+  background:repeating-linear-gradient(180deg,var(--lane) 0 5px,transparent 5px 10px);opacity:.28}
+.fill{position:absolute;top:2px;bottom:2px;left:0;background:rgba(63,191,127,.16);
+  border-right:2px solid var(--grass);transition:width .5s cubic-bezier(.3,1,.5,1)}
+.walker{position:absolute;top:50%;width:28px;height:28px;margin:-14px 0 0 -14px;
+  transition:left .5s cubic-bezier(.3,1,.5,1)}
+.ticks{display:flex;justify-content:space-between;font-family:'Barlow Semi Condensed';
+  font-weight:600;font-size:10.5px;letter-spacing:.08em;color:var(--dusk)}
+.ticks span.on{color:var(--grass)}
+.next{font-size:13px;color:var(--dusk);margin-top:12px;line-height:1.5}
+.next b{color:var(--lane);font-weight:600}
+.copy{display:flex;gap:8px;margin-top:12px}
+.copy input{flex:1;min-width:0;background:var(--asphalt-deep);border:1px solid var(--hair);
+  border-radius:9px;padding:11px;color:var(--dusk);font-family:'Barlow Semi Condensed';font-size:12px}
+.copy button{border:0;border-radius:9px;padding:0 16px;background:var(--asphalt-lift);
+  color:var(--lane);font-family:'Barlow Semi Condensed';font-weight:600;font-size:12px;
+  letter-spacing:.1em;cursor:pointer}
+.copy button:hover{background:var(--grass);color:#0B1A13}
+
+.lb-head{display:flex;align-items:center;justify-content:space-between;
+  padding:15px 16px;border-bottom:1px solid var(--hair)}
+.lb-tabs{display:flex;gap:4px;background:var(--asphalt-deep);
+  border:1px solid var(--hair);border-radius:999px;padding:3px}
+.lb-tab{border:0;background:none;cursor:pointer;border-radius:999px;
+  font-family:'Barlow Semi Condensed';font-weight:600;font-size:11px;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--dusk);padding:6px 12px}
+.lb-tab.on{background:var(--curb);color:var(--asphalt-deep)}
+.settled{font-family:'Barlow Semi Condensed';font-weight:600;font-size:11.5px;
+  letter-spacing:.06em;color:var(--grass)}
+.empty{padding:26px 16px;text-align:center;font-size:13px;color:var(--dusk)}
+.season{font-family:'Barlow Semi Condensed';font-weight:600;font-size:11.5px;
+  color:var(--brake);letter-spacing:.06em;font-variant-numeric:tabular-nums}
+.lane-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px dashed var(--hair)}
+.lane-row:last-child{border-bottom:0}
+.sign{width:30px;height:30px;flex:none;border-radius:7px;display:grid;place-items:center;
+  font-family:'Bungee';font-size:13px;background:var(--asphalt-lift);color:var(--dusk)}
+.sign.g1{background:var(--curb);color:var(--asphalt-deep)}
+.sign.g2{background:#B8C4D2;color:var(--asphalt-deep)}
+.sign.g3{background:#B07B4A;color:#fff}
+.who{flex:1;min-width:0}
+.who h4{font-family:'Barlow Semi Condensed';font-weight:600;font-size:14.5px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who p{font-size:11px;color:var(--dusk);margin-top:1px;font-variant-numeric:tabular-nums}
+.pts{text-align:right;flex:none}
+.pts b{font-family:'Barlow Condensed';font-weight:700;font-size:20px;
+  font-variant-numeric:tabular-nums;display:block;line-height:1}
+.pts i{font-style:normal;font-family:'Barlow Semi Condensed';font-weight:600;
+  font-size:10px;letter-spacing:.06em;color:var(--grass)}
+.claim-btn{flex:none;border:0;cursor:pointer;font-family:'Barlow Semi Condensed';
+  font-weight:600;font-size:10px;letter-spacing:.1em;padding:7px 11px;border-radius:7px;
+  background:var(--curb);color:var(--asphalt-deep);transition:filter .1s}
+.claim-btn:hover{filter:brightness(1.1)}
+.claim-btn:active{transform:translateY(1px)}
+.claim-btn.off{background:transparent;color:#574B66;cursor:default;
+  border:1px solid rgba(237,230,245,.08)}
+.claim-btn.done{background:transparent;color:var(--grass);cursor:default;
+  border:1px solid rgba(63,191,127,.35)}
+.mine{padding:13px 16px;background:var(--asphalt-deep);display:flex;
+  justify-content:space-between;align-items:center;font-size:13px;color:var(--dusk)}
+.mine b{font-family:'Barlow Condensed';font-size:19px;color:var(--lane);font-variant-numeric:tabular-nums}
+
+.claim{border-color:rgba(255,138,31,.4);
+  background:linear-gradient(180deg,rgba(255,138,31,.13),rgba(255,138,31,.03))}
+.claim .pad{text-align:center}
+.claim h3{font-family:'Bungee';font-size:17px;margin:9px 0 6px}
+.claim p{font-size:13px;color:var(--dusk);line-height:1.55;margin-bottom:15px}
+.claim p b{color:var(--curb)}
+
+details{border-bottom:1px solid var(--hair)}
+details:last-of-type{border-bottom:0}
+summary{list-style:none;cursor:pointer;padding:14px 16px;display:flex;
+  justify-content:space-between;align-items:center;
+  font-family:'Barlow Semi Condensed';font-weight:600;font-size:13.5px;letter-spacing:.03em}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-family:'Barlow Condensed';font-size:20px;color:var(--dusk)}
+details[open] summary::after{content:"–"}
+details[open] summary{color:var(--curb)}
+.body{padding:0 16px 16px;font-size:13px;line-height:1.7;color:var(--dusk)}
+.body ol{padding-left:17px}
+.body li{margin-bottom:7px}
+.body b{color:var(--lane);font-weight:600}
+.body .warn{color:var(--brake);font-weight:600}
+
+.cr-modal{position:fixed;inset:0;z-index:60;display:flex;align-items:center;
+  justify-content:center;padding:20px;background:rgba(12,7,20,.82);
+  backdrop-filter:blur(4px)}
+.cr-modal[hidden]{display:none}
+.cr-sheet{width:100%;max-width:360px;background:var(--asphalt);
+  border:1px solid var(--hair);border-radius:18px;padding:22px;
+  box-shadow:0 24px 60px rgba(0,0,0,.6)}
+.cr-sheet h3{font-family:'Bungee';font-size:17px;margin:8px 0 8px}
+.cr-sheet p{font-size:13px;line-height:1.55;color:var(--dusk)}
+.phone-row{display:flex;align-items:center;gap:0;margin:16px 0 6px;
+  background:var(--asphalt-deep);border:1px solid var(--hair);border-radius:11px;
+  overflow:hidden;transition:border-color .15s}
+.phone-row.bad{border-color:var(--brake)}
+.phone-row .pfx{font-family:'Barlow Condensed';font-weight:700;font-size:19px;
+  color:var(--curb);padding:0 12px 0 14px;border-right:1px solid var(--hair);
+  line-height:48px;flex:none}
+.phone-row input{flex:1;min-width:0;background:none;border:0;outline:0;
+  color:var(--lane);font-family:'Barlow Condensed';font-weight:700;font-size:19px;
+  letter-spacing:.06em;padding:0 12px;height:48px}
+.phone-row input::placeholder{color:#574B66;letter-spacing:.04em}
+.cm-err{min-height:17px;font-size:12px;color:var(--brake);margin-bottom:12px}
+.cm-actions{display:flex;gap:10px;margin-top:4px}
+.cm-actions .btn{flex:1;padding:15px;font-size:13px}
+.btn.ghost{background:transparent;color:var(--dusk);
+  box-shadow:inset 0 0 0 1px var(--hair)}
+.btn.ghost:active{transform:none;box-shadow:inset 0 0 0 1px var(--hair)}
+.cm-done{text-align:center}
+.cm-done .tick{font-family:'Bungee';font-size:34px;color:var(--grass);line-height:1}
+
+.foot{text-align:center;font-size:10.5px;color:#5A4E6B;padding:8px 0 0;line-height:1.7}
+.hidden{display:none !important}
+@media (prefers-reduced-motion:reduce){
+  #chick,.pop,.splat,.splat i,.splat .burst,#chick.idle,.ready .num,
+  .bat,.bat .w,.fog,.score{transition:none;animation:none}
+  .bat{display:none}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="top">
+    <div>
+      <div class="mark">CHICKY <span>ROAD</span></div>
+      <div class="tag">Hop Smart · Survive The Night</div>
+    </div>
+    <a class="grp" href="https://t.me/krgilersquad" target="_blank" rel="noopener"><b></b>KR GILER SQUAD</a>
+  </header>
+
+  <section class="card">
+    <div class="stage" id="stage">
+      <div id="world"></div>
+      <div class="web l"><svg viewBox="0 0 64 64" aria-hidden="true"><g stroke="rgba(237,230,245,.34)" fill="none" stroke-width="1" stroke-linecap="round"><path d="M0 0 L64 0 M0 0 L0 64 M0 0 L45 45 M0 0 L58 24 M0 0 L24 58"/><path d="M15 0 Q11 11 0 15 M29 0 Q22 22 0 29 M43 0 Q32 32 0 43 M57 0 Q42 42 0 57"/></g></svg></div>
+      <div class="web r"><svg viewBox="0 0 64 64" aria-hidden="true"><g stroke="rgba(237,230,245,.34)" fill="none" stroke-width="1" stroke-linecap="round"><path d="M0 0 L64 0 M0 0 L0 64 M0 0 L45 45 M0 0 L58 24 M0 0 L24 58"/><path d="M15 0 Q11 11 0 15 M29 0 Q22 22 0 29 M43 0 Q32 32 0 43 M57 0 Q42 42 0 57"/></g></svg></div>
+      <div class="bat a"><svg viewBox="0 0 40 24"><g fill="#120C1C"><path class="w" d="M19 12 L4 4 q4 7 -2 9 q7 1 9 5 Z"/><path class="w r" d="M21 12 L36 4 q-4 7 2 9 q-7 1 -9 5 Z"/><ellipse cx="20" cy="12" rx="3.4" ry="4.6"/><path d="M17.4 8.4 l1.1 -3 l1.2 2.4 z M22.6 8.4 l-1.1 -3 l-1.2 2.4 z"/></g></svg></div>
+      <div class="bat b"><svg viewBox="0 0 40 24"><g fill="#120C1C"><path class="w" d="M19 12 L4 4 q4 7 -2 9 q7 1 9 5 Z"/><path class="w r" d="M21 12 L36 4 q-4 7 2 9 q-7 1 -9 5 Z"/><ellipse cx="20" cy="12" rx="3.4" ry="4.6"/><path d="M17.4 8.4 l1.1 -3 l1.2 2.4 z M22.6 8.4 l-1.1 -3 l-1.2 2.4 z"/></g></svg></div>
+      <div class="fog"></div>
+      <div class="hud off" id="hud">
+        <div class="hud-top">
+          <div class="live" id="liveScore">0<small>Lanes</small></div>
+          <div class="hud-right">
+            <div class="lives" id="livesRow"></div>
+            <div class="chip" id="seedChip">SEED —</div>
+          </div>
+        </div>
+        <div class="timer-bar"><div class="timer-fill" id="tf"></div></div>
+      </div>
+      <div class="flash" id="flash"></div>
+      <div class="ready" id="readyUI"><div class="num" id="rNum">3</div><div class="cap" id="rCap">Get ready</div></div>
+      <div class="veil" id="veil"></div>
+      <button class="tapzone off" id="tapzone" aria-label="Tap to hop"></button>
+    </div>
+    <div class="pad" id="cta"></div>
+  </section>
+
+  <section class="card">
+    <div class="pad">
+      <div class="rowtop">
+        <div class="eyebrow">Invite Bonus</div>
+        <div class="bonus" id="bonusNum">+1 life</div>
+      </div>
+      <div style="font-size:12.5px;color:var(--dusk)">Friends who subscribe the bot <b style="color:var(--lane)">and play once</b> · caps at +3</div>
+      <div class="track">
+        <div class="fill" id="fill"></div>
+        <div class="zbr" style="left:calc(33.3% - 7px)"></div>
+        <div class="zbr" style="left:calc(66.6% - 7px)"></div>
+        <div class="zbr" style="right:0"></div>
+        <div class="walker" id="walker"></div>
+      </div>
+      <div class="ticks">
+        <span>0</span><span id="t10">3 · +1</span><span id="t20">6 · +2</span><span id="t30">9 · +3</span>
+      </div>
+      <p class="next" id="nextTier"></p>
+      <p class="next" id="refStatus" style="display:none;font-size:11.5px"></p>
+      <div class="copy">
+        <input id="link" readonly value="https://t.me/krgilersquad?start=inv_A7K92">
+        <button id="copyBtn">Copy</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="lb-head">
+      <div class="lb-tabs">
+        <button class="lb-tab on" data-tab="today">Today</button>
+        <button class="lb-tab" data-tab="yst">Yesterday</button>
+      </div>
+      <div class="season" id="seasonLeft">—</div>
+    </div>
+    <div id="lb"></div>
+    <div class="mine" id="mineRow">
+      <span>Your score today · Rank <b style="font-size:13px" id="myRank">—</b></span>
+      <b id="myTotal">—</b>
+    </div>
+  </section>
+
+
+  <section class="card">
+    <div class="pad" style="padding-bottom:6px"><div class="eyebrow">Terms &amp; Conditions</div></div>
+
+    <details open>
+      <summary>How to play</summary>
+      <div class="body"><ol>
+        <li>Each Telegram account gets <b>1 run per day</b>, resetting at <b>00:00 (UTC+8)</b>.</li>
+        <li>A run lasts <b>60 seconds</b> of play and starts with <b>3 lives</b>.</li>
+        <li>Every tap hops the chicken one lane forward. <b>Each new lane crossed scores 1 point.</b></li>
+        <li>Getting hit costs <b>1 life</b>. You respawn at the last <b>grass checkpoint</b> — every 10th lane — after a <b>3-second countdown</b>, then briefly invincible.</li>
+        <li>The clock is <b>paused</b> during every countdown, so a death costs you ground, not time.</li>
+        <li>Lanes you have already crossed do not score again, so a death costs you real ground.</li>
+        <li>The run ends when lives run out or time expires. Your score is the <b>furthest lane reached</b>.</li>
+        <li>Traffic gets faster and denser every 10 lanes.</li>
+        <li>The leaderboard <b>resets every day at 00:00 (UTC+8)</b>. Your rank is your single run for that day — a bad day never follows you.</li>
+      </ol></div>
+    </details>
+
+    <details>
+      <summary>Same road for everyone</summary>
+      <div class="body"><ol>
+        <li>Traffic is generated from a <b>single daily seed</b>. Every player on a given day faces the <b>identical road</b> — same cars, same speeds, same gaps.</li>
+        <li>The seed is issued by the server at the start of your run and shown in the corner of the screen.</li>
+        <li>No player receives easier or harder traffic than another.</li>
+      </ol></div>
+    </details>
+
+    <details>
+      <summary>Invite bonus</summary>
+      <div class="body"><ol>
+        <li>Share <b>your personal invite link</b>. Friends who open it subscribe to <b>@KRminigame_bot</b>.</li>
+        <li>A referral only counts once that friend has <b>played at least one run</b>.</li>
+        <li>3 friends <b>+1 life</b> · 6 friends <b>+2 lives</b> · 9 friends <b>+3 lives</b>.</li>
+        <li><b>+3 is the cap.</b> Inviting beyond 9 adds nothing further.</li>
+        <li>Extra lives give you more room for error. They do <b>not</b> add points — distance is still earned by skill.</li>
+        <li>Applies to <b>every run</b>, counted from your valid total at the moment the run starts.</li>
+        <li>Referrals are <b>counted for life</b> — they never reset. Each person can only ever be referred once.</li>
+        <li class="warn">Duplicate IPs, duplicate devices, blank new accounts and bulk-added members are excluded.</li>
+      </ol></div>
+    </details>
+
+    <details>
+      <summary>Rewards &amp; claiming</summary>
+      <div class="body"><ol>
+        <li>Top 1 — <b>30 KR Coin</b> · Top 2 — <b>20 KR Coin</b> · Top 3 — <b>10 KR Coin</b> · Top 4 and 5 — <b>5 KR Coin</b>.</li>
+        <li>On a tie, <b>whoever reached the score first ranks higher</b> — the time each score was set is shown on the board.</li>
+        <li>The board settles at <b>00:00 (UTC+8)</b>. Open the <b>YESTERDAY</b> tab and tap <b>CLAIM</b> on your row.</li>
+        <li>You will be asked for your <b>Malaysian mobile number (+60)</b>, then sent to <b>@KRminigame_bot</b> to finish the claim.</li>
+        <li><b>One claim per player per day.</b></li>
+        <li class="warn">Rewards must be claimed <b>the following day</b>. Once that day ends the board is gone and the reward is forfeited.</li>
+        <li>Spend your KR Coin across our mini games — <b>Lucky Spin</b>, <b>Penalty Kick</b> and <b>Smash Egg</b>.</li>
+        <li>KR Coin is issued to your kgame99 account, so registration is required first.</li>
+        <li>Only players who enter through <b>Telegram</b> are ranked.</li>
+      </ol></div>
+    </details>
+
+    <details>
+      <summary>Fair play</summary>
+      <div class="body"><ol>
+        <li>The score your device displays is <b>provisional</b>. Only your <b>input timings</b> are submitted; the server replays the run against the daily seed and the <b>server result is final</b>.</li>
+        <li>Any run whose inputs do not reproduce the claimed score is <b>voided</b>.</li>
+        <li>Runs showing reaction times consistently below the human threshold are treated as scripted and voided.</li>
+        <li class="warn">Auto-clickers, bots, emulators and multiple accounts forfeit eligibility and freeze any reward.</li>
+        <li>Full input logs are retained, so any disputed run can be replayed on request.</li>
+        <li>The organiser reserves the right of final interpretation and may amend these terms at any time.</li>
+      </ol></div>
+    </details>
+  </section>
+
+  <p class="foot">🎃 CHICKY ROAD · HALLOWEEN · Powered by KGAME99<br>Not affiliated with Telegram</p>
+</div>
+
+<div class="cr-modal" id="claimModal" hidden>
+  <div class="cr-sheet">
+    <div id="cmForm">
+      <div class="eyebrow">Claim reward</div>
+      <h3 id="cmTitle">Rank #1 · 30 KR Coin</h3>
+      <p>Enter the Malaysian mobile number registered with your account. Confirmation is sent to you on Telegram.</p>
+      <div class="phone-row" id="cmRow">
+        <span class="pfx">+60</span>
+        <input id="cmPhone" type="tel" inputmode="numeric" autocomplete="tel"
+               placeholder="12 345 6789" maxlength="14">
+      </div>
+      <p class="cm-err" id="cmErr"></p>
+      <div class="cm-actions">
+        <button class="btn ghost" id="cmNo">NO</button>
+        <button class="btn go" id="cmYes">YES</button>
+      </div>
+    </div>
+
+    <div id="cmDone" class="cm-done" hidden>
+      <div class="tick">✓</div>
+      <h3>Claim submitted</h3>
+      <p id="cmDoneMsg"></p>
+      <div class="cm-actions" style="margin-top:16px">
+        <button class="btn ghost" id="cmClose">CLOSE</button>
+        <button class="btn" id="cmOpenBot">OPEN BOT</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   SPA-SAFE BOOT
+   Nothing runs until the markup is actually in the DOM.
+   If your router injects HTML with innerHTML and then evals
+   this script, call ChickyRoad.boot() AFTER the injection.
+   ══════════════════════════════════════════════════════════ */
+(function(){
+'use strict';
+
+/* ══════════════════════════════════════════════════════════
+   CONFIG — the only block you normally need to edit.
+   Leave apiBase empty to run in DEMO mode (mock data, client
+   seed). Set it to your backend to go live.
+   ══════════════════════════════════════════════════════════ */
+const CONFIG={
+  /* ── Supabase (no backend needed) ──────────────────────────
+     Fill these two in and the leaderboard goes live.
+     Leave them empty to stay in DEMO mode with mock data.     */
+  sbUrl     : 'https://kcxzitxccxfwbeojdptn.supabase.co',
+  sbKey     : 'sb_publishable_N4r7o0h21OPP1SdWhZ6e4A__qjO_zNO',   // publishable key
+  perPlayerSeed: true,                         // true = each player gets their own road
+
+  apiBase   : '',                              // only for a real backend later
+  groupUrl  : 'https://t.me/krgilersquad',
+  botName   : 'KRminigame_bot',
+  appName   : 'chicky',                        // BotFather → /newapp short name
+  claimUrl  : 'https://kgame99.com/register',
+  claimOwnRowOnly : true,        // false = every row's button is clickable
+  /* Appended to the bot start payload so your webhook can tell a
+     real claim from a hand-typed one. Must match the bot side.   */
+  claimToken      : '6wyHle3kHY',
+
+  /* Testing helper. true = CLAIM appears on both tabs, on every
+     row, for anyone. MUST stay false in production.            */
+  claimTestMode   : false,
+  rewards   : [30,20,10,5,5],    // Top 1 … Top 5, in KR Coin
+  baseLives : 3,
+
+  /* ── DIFFICULTY ───────────────────────────────────────────
+     Tune these, redeploy, watch the median move.
+     Target median ≈ 45–60 lanes.
+     Lower numbers = easier.                                  */
+  diff: {
+    speedRamp   : 0.05,   // car speed +5% every 10 lanes (was 0.08)
+    densityRamp : 0.05,   // traffic density +5% every 10 lanes
+    speedMin    : 46,     // slowest a car starts at   (was 52)
+    speedRange  : 105,    // random speed spread       (was 128)
+    twoCarChance: 0.38,   // chance a lane holds 2 cars (was 0.45)
+    thirdCarTier: 4,      // 3-car lanes start at lane 40 (was 30)
+    thirdCarBase: 0.20
+  },
+  shareText : 'Chicky Road 🐔 — one run a day, daily leaderboard. Subscribe and play with me.'
+};
+
+/* ── Telegram WebApp adapter (safe in a plain browser too) ── */
+const TG=(function(){
+  const t=window.Telegram&&window.Telegram.WebApp;
+  const inside=!!(t&&typeof t.initData==='string');
+  let backCb=null;
+  const hf=()=>inside&&t.HapticFeedback;
+  return {
+    raw:t, inside,
+    initData  : inside?t.initData:'',
+    user      : inside?((t.initDataUnsafe||{}).user||null):null,
+    startParam: inside?((t.initDataUnsafe||{}).start_param||''):'',
+    init(){
+      if(!inside) return;
+      t.ready(); t.expand();
+      t.disableVerticalSwipes&&t.disableVerticalSwipes();   // stop tap-drag closing the app
+      t.setHeaderColor&&t.setHeaderColor('#121C27');
+      t.setBackgroundColor&&t.setBackgroundColor('#121C27');
+    },
+    tap (){ const h=hf(); h&&h.impactOccurred('light'); },
+    hit (){ const h=hf(); h&&h.notificationOccurred('error'); },
+    win (){ const h=hf(); h&&h.notificationOccurred('success'); },
+    open  (u){ inside&&t.openLink        ? t.openLink(u)        : window.open(u,'_blank','noopener'); },
+    openTg(u){ inside&&t.openTelegramLink? t.openTelegramLink(u): window.open(u,'_blank','noopener'); },
+    alert (m,cb){ inside&&t.showAlert  ? t.showAlert(m,cb) : (window.alert(m),cb&&cb()); },
+    confirm(m,cb){ inside&&t.showConfirm? t.showConfirm(m,cb): cb(window.confirm(m)); },
+    back(on,cb){
+      if(!inside||!t.BackButton) return;
+      if(on){ backCb=cb; t.BackButton.show(); t.BackButton.onClick(cb); }
+      else { t.BackButton.hide(); backCb&&t.BackButton.offClick(backCb); backCb=null; }
+    },
+    onViewport(cb){ inside&&t.onEvent&&t.onEvent('viewportChanged',cb); }
+  };
+})();
+
+const DEBUG=/[?&]debug=1/.test(location.search)||TG.startParam==='debug';
+const log=(...a)=>{ if(DEBUG) console.log('[ChickyRoad]',...a); };
+let alive=false;
+
+function boot(auto){
+  const $=id=>document.getElementById(id);
+  const stage=$('stage'), world=$('world');
+  if(!stage||!world){
+    /* silent on auto-boot: the router simply hasn't injected the markup yet */
+    if(!auto) log('markup not in the DOM — insert the HTML before calling boot().');
+    return false;
+  }
+
+  /* SINGLETON: if this script gets evaluated twice (SPA routers often do),
+     shut the previous instance down instead of running two game loops. */
+  if(typeof window.__chickyStop==='function'){
+    window.__chickyStop();
+    log('previous instance stopped.');
+  }
+  alive=true;
+  window.__chickyStop=function(){ alive=false; };
+
+  /* every element resolved explicitly — no reliance on window.<id> globals */
+  const flash=$('flash'), readyUI=$('readyUI'), rNum=$('rNum'), rCap=$('rCap'),
+        veil=$('veil'), hud=$('hud'), tapzone=$('tapzone'), cta=$('cta'),
+        liveScore=$('liveScore'), livesRow=$('livesRow'), seedChip=$('seedChip'), tf=$('tf'),
+        bonusNum=$('bonusNum'), fill=$('fill'), walker=$('walker'), nextTier=$('nextTier'),
+        link=$('link'), copyBtn=$('copyBtn'), lb=$('lb'), myTotal=$('myTotal'),
+        myRank=$('myRank'), seasonLeft=$('seasonLeft'), mineRow=$('mineRow'), claimModal=$('claimModal'), cmForm=$('cmForm'),
+        cmDone=$('cmDone'), cmDoneMsg=$('cmDoneMsg'), cmTitle=$('cmTitle'),
+        cmPhone=$('cmPhone'), cmErr=$('cmErr'), cmRow=$('cmRow'),
+        cmYes=$('cmYes'), cmNo=$('cmNo'), cmClose=$('cmClose'), cmOpenBot=$('cmOpenBot');
+
+  const missing=Object.entries({flash,readyUI,rNum,rCap,veil,hud,tapzone,cta,liveScore,
+    livesRow,seedChip,tf,bonusNum,fill,walker,nextTier,link,copyBtn,lb,myTotal,myRank,
+    seasonLeft}).filter(([,v])=>!v).map(([k])=>k);
+  if(missing.length){
+    console.error('[ChickyRoad] missing elements:',missing.join(', '));
+    alive=false; return false;
+  }
+
+/* ═══ sprite ═══ */
+const CHICK=`<svg viewBox="0 0 64 64" aria-hidden="true" style="width:100%;height:100%">
+<ellipse cx="32" cy="57" rx="15" ry="3.5" fill="rgba(0,0,0,.3)"/>
+<ellipse cx="32" cy="36" rx="17" ry="16" fill="#FFF8EC"/>
+<ellipse cx="32" cy="26" rx="13" ry="12" fill="#FFFDF7"/>
+<ellipse cx="32" cy="16" rx="15" ry="3.5" fill="#3B2A55"/>
+<path d="M32 -2 L25 15 h14 Z" fill="#4B3570"/>
+<path d="M27 9h10l1 3H26z" fill="#FF8A1F"/>
+<circle cx="27" cy="25" r="2.6" fill="#1B2836"/><circle cx="37" cy="25" r="2.6" fill="#1B2836"/>
+<circle cx="27.9" cy="24.2" r="1" fill="#fff"/><circle cx="37.9" cy="24.2" r="1" fill="#fff"/>
+<path d="M32 29l-5 3 5 3 5-3z" fill="#F4A93D"/>
+<path d="M15 36q-4 3 0 8" stroke="#F0E6D2" stroke-width="4" fill="none" stroke-linecap="round"/>
+<path d="M49 36q4 3 0 8" stroke="#F0E6D2" stroke-width="4" fill="none" stroke-linecap="round"/>
+<path d="M25 50v6M39 50v6" stroke="#F4A93D" stroke-width="3.5" stroke-linecap="round"/>
+<path d="M21 57h8M35 57h8" stroke="#F4A93D" stroke-width="3.5" stroke-linecap="round"/></svg>`;
+const CHICK_URI="url(\"data:image/svg+xml;utf8,"+encodeURIComponent(
+`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M26 15h4v6h-4zM30 11h4v6h-4zM34 15h4v6h-4z" fill="#E5484D"/><ellipse cx="32" cy="34" rx="18" ry="17" fill="#FFF8EC"/><circle cx="26" cy="30" r="3" fill="#1B2836"/><circle cx="38" cy="30" r="3" fill="#1B2836"/><path d="M32 35l-5 3 5 3 5-3z" fill="#F4A93D"/></svg>`)+"\")";
+
+/* ═══ mock data ═══ */
+const S={invited:8,myTotal:0,myRank:0};
+const TIERS=[{n:3,l:1},{n:6,l:2},{n:9,l:3}];
+const livesOf=n=>TIERS.filter(t=>n>=t.n).map(t=>t.l).pop()||0;
+const BOARD=[
+  {u:'@kopi_o_kaw',p:74,at:'08:12'},{u:'@SitiTapz',p:71,at:'13:40'},
+  {u:'@AhBengKL_88',p:66,at:'09:05'},{u:'@Devi_Rush',p:66,at:'19:22'},
+  {u:'@limyaokai',p:61,at:'11:58'},
+];
+
+/* ═══ SERVER API ═══════════════════════════════════════════
+   Every call carries TG.initData — the server MUST verify its
+   HMAC signature with the bot token before trusting the user.
+   The client never decides the score: it submits input timings
+   and the server replays them against the seed it issued.
+   ══════════════════════════════════════════════════════════ */
+let inviteLink=CONFIG.groupUrl;
+let invitePending=0;          // subscribed but hasn't played a run yet
+let boardTab='today';         // 'today' (live) | 'yst' (settled, claimable)
+const CLAIMED=new Set();      // claim_date strings this player already claimed
+const BOARD_YST=[];
+function myInviteLink(){
+  return 'https://t.me/'+CONFIG.botName+'/'+CONFIG.appName+'?startapp=ref_'+tgId();
+}
+async function call(path,body){
+  const r=await fetch(CONFIG.apiBase+path,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(Object.assign({initData:TG.initData,startParam:TG.startParam},body||{}))
+  });
+  if(!r.ok) throw new Error(path+' → '+r.status);
+  return r.json();
+}
+/* ── Supabase REST helpers ── */
+const SB={
+  on: !!(CONFIG.sbUrl&&CONFIG.sbKey),
+  head(extra){ return Object.assign({
+    apikey:CONFIG.sbKey, Authorization:'Bearer '+CONFIG.sbKey,
+    'Content-Type':'application/json'},extra||{}); },
+  async get(path){
+    const r=await fetch(CONFIG.sbUrl+'/rest/v1/'+path,{headers:this.head()});
+    if(!r.ok) throw new Error('GET '+path+' → '+r.status);
+    return r.json();
+  },
+  async insert(table,row,conflict){
+    const q=conflict?('?on_conflict='+conflict):'';
+    const pref=conflict?'resolution=ignore-duplicates,return=minimal':'return=minimal';
+    const r=await fetch(CONFIG.sbUrl+'/rest/v1/'+table+q,{
+      method:'POST', headers:this.head({Prefer:pref}),
+      body:JSON.stringify(row)});
+    if(r.status===409) return {duplicate:true};       // already played today
+    if(!r.ok){
+      let detail='';
+      try{ const j=await r.json(); detail=j.message||j.hint||JSON.stringify(j); }
+      catch{ try{ detail=await r.text(); }catch{} }
+      throw new Error(r.status+' '+String(detail).slice(0,160));
+    }
+    return {ok:true};
+  }
+};
+function myDate(){                                   // today's date in UTC+8
+  const d=new Date(myNow());
+  return d.getUTCFullYear()+'-'+pad(d.getUTCMonth()+1)+'-'+pad(d.getUTCDate());
+}
+function ystDate(){
+  const d=new Date(myNow()-D);
+  return d.getUTCFullYear()+'-'+pad(d.getUTCMonth()+1)+'-'+pad(d.getUTCDate());
+}
+function tgId(){ return String((TG.user||{}).id||'guest-'+(localStorage.crGuest||
+  (localStorage.crGuest=Math.random().toString(36).slice(2,9)))); }
+function tgName(){ return (TG.user||{}).username||(TG.user||{}).first_name||'player'; }
+
+const API={
+  demo: !CONFIG.apiBase && !SB.on,
+  /* GET player state: invite count, personal link, whether today's run is used */
+  async state(){
+    if(CONFIG.apiBase) return call('/chicky/state');
+    if(SB.on){
+      const id=tgId();
+      const q='?select=*&tg_id=eq.'+encodeURIComponent(id);
+      let inviteErr='';
+      const [board,yst,today,inv,claims]=await Promise.all([
+        SB.get('cr_leaderboard?select=*&limit=50'),
+        SB.get('cr_leaderboard_yst?select=*&limit=5').catch(()=>[]),
+        SB.get('cr_today?select=tg_id&tg_id=eq.'+encodeURIComponent(id)),
+        SB.get('cr_invite_stats'+q).catch(e=>{ inviteErr=e.message||String(e); return []; }),
+        SB.get('cr_my_claims?select=claim_date&tg_id=eq.'+encodeURIComponent(id)).catch(()=>[])
+      ]);
+      const st=inv[0]||{total:0,valid:0};
+      invitePending=Math.max(0,st.total-st.valid);
+      /* browser-only players have no Telegram identity — keep them off the board */
+      const map=a=>a.filter(r=>!String(r.tg_id).startsWith('guest-'))
+                    .map(r=>({u:'@'+r.username,p:r.score,at:r.at,tg:r.tg_id}));
+      const rows=map(board), rowsY=map(yst);
+      const mine=rows.findIndex(r=>r.tg===id);
+      return {
+        canPlay: today.length===0,
+        leaderboard: rows.slice(0,5),
+        yesterday: rowsY.slice(0,5),
+        myTotal: mine>-1?rows[mine].p:0,
+        myRank : mine>-1?mine+1:rows.length+1,
+        claims: claims.map(c=>c.claim_date),
+        invited: st.valid,
+        inviteTotal: st.total, inviteValid: st.valid, inviteErr,
+        inviteLink: myInviteLink()
+      };
+    }
+    return {invited:S.invited,inviteLink:myInviteLink(),
+      canPlay:true,myTotal:S.myTotal,myRank:S.myRank,leaderboard:BOARD,
+      yesterday:[{u:'@candybae003',p:52,at:'10:50'},{u:'@huhu77088',p:49,at:'11:03'},
+                 {u:'@jaychoi1718',p:26,at:'10:48'}]};
+  },
+  /* START a run: server checks the daily quota and issues seed + token */
+  async startRun(){
+    if(CONFIG.apiBase) return call('/chicky/start');
+    return {seed:demoSeed(),runToken:'local',
+      lives:CONFIG.baseLives+livesOf(S.invited),invited:S.invited};
+  },
+  /* SUBMIT input timings — server replays and returns the authoritative score */
+  async submitRun(p){
+    if(CONFIG.apiBase) return call('/chicky/submit',p);
+    if(SB.on){
+      const res=await SB.insert('cr_runs',{
+        tg_id:tgId(), username:tgName(), played_on:myDate(),
+        score:p.claimedScore, inputs:p.inputs        // kept for later auditing
+      });
+      if(res.duplicate) return {verified:false,duplicate:true};
+      API.state().then(st=>{
+        if(!st) return;
+        S.myTotal=st.myTotal; S.myRank=st.myRank;
+        BOARD.length=0; st.leaderboard.forEach(r=>BOARD.push(r));
+        renderBoard();
+      }).catch(()=>{});
+      return {verified:true,score:p.claimedScore};
+    }
+    return {verified:true,score:p.claimedScore};
+  }
+};
+
+/* ═══ clocks (UTC+8) ═══ */
+const D=864e5, myNow=()=>Date.now()+8*36e5;
+const untilMidnight=()=>D-(myNow()%D);
+const untilSeasonEnd=()=>{const n=myNow(),d=Math.floor(n/D);return (d+((3-d%7+7)%7)+1)*D-n;};
+const pad=n=>String(n).padStart(2,'0');
+const hms=ms=>{const s=Math.max(0,ms/1000|0);return pad(s/3600|0)+':'+pad(s%3600/60|0)+':'+pad(s%60);};
+const dhms=ms=>{const s=Math.max(0,ms/1000|0);
+  return (s/86400|0)+'d '+pad(s%86400/3600|0)+':'+pad(s%3600/60|0)+':'+pad(s%60);};
+
+/* ═══ DETERMINISTIC WORLD ═══════════════
+   Traffic = pure function of (dailySeed, laneIndex, tick).
+   Taps are timestamped at pointerdown and replayed into the
+   tick they actually belong to — so a dropped frame never
+   costs the player a life, and fast tapping is never immunity.
+═══════════════════════════════════════ */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;
+  var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;
+  return((t^t>>>14)>>>0)/4294967296;};}
+/* The seed MUST come from the server at run start. The local
+   value below is a DEMO fallback only — a client-clock seed lets
+   a player set their phone forward and scout tomorrow's road. */
+function seedLabel(v){ return (v>>>0).toString(36).toUpperCase().slice(0,6); }
+function demoSeed(){
+  /* Without a backend the seed must be derived on the client.
+     Mixing in the Telegram user id gives every player a different
+     (but statistically identical) road, so nobody can share a
+     memorised solution. It does NOT stop clock-forward scouting —
+     only a server-issued seed can. */
+  let v=Math.floor(myNow()/D)*2654435761;
+  if(CONFIG.perPlayerSeed){
+    const uid=String((TG.user||{}).id||'guest');
+    for(let i=0;i<uid.length;i++) v=Math.imul(v^uid.charCodeAt(i),2246822519);
+  }
+  return v>>>0;
+}
+let DAILY_SEED=demoSeed();
+let SEED_LABEL=seedLabel(DAILY_SEED);
+let RUN_TOKEN='demo';
+function applySeed(v){ DAILY_SEED=v>>>0; SEED_LABEL=seedLabel(DAILY_SEED); }
+const laneSeed=k=>((DAILY_SEED^Math.imul(k+1,2246822519))>>>0);
+
+const DT=1/60, LW=78, GRASS=104;
+const RUN_TICKS=3600;          // 60s of *play* — countdowns don't count
+const READY_TICKS=180;         // 3s
+const INVULN_TICKS=60;         // 1s after "GO"
+const HIT=44;                  // forgiving but honest hitbox
+/* hearse black, pumpkin, toxic green, blood red, bone, witch purple */
+const CAR_COLORS=['#2A2436','#E8721C','#7ED957','#C62828','#D9D2E0','#6A4C93'];
+const isMedian=k=>k>0&&k%10===0;
+const laneCenter=k=>GRASS+k*LW+LW/2;
+const stepX=s=>s===0?GRASS/2:laneCenter(s-1);
+const checkpointStep=s=>{const m=Math.floor((s-1)/10)*10;return m>0?m+1:0;};
+
+let stageW=440, stageH=340, chickY=177;
+function measure(){stageW=stage.clientWidth;stageH=stage.clientHeight;chickY=Math.round(stageH*.52);}
+
+const lanes=new Map();
+let tick=0, gameTicks=0, step=0, maxStep=0, camX=0;
+let lives=0, maxLives=0, invuln=0, readyLeft=0, running=false;
+let inputLog=[], tapQueue=[], runStartPerf=0, lastRNum=-1;
+
+const startPad=document.createElement('div');
+startPad.className='strip grass';
+startPad.style.cssText=`left:0;width:${GRASS}px`;
+startPad.innerHTML=`<span class="bush" style="width:24px;height:22px;left:14px;top:38px"></span>
+<span class="bush" style="width:34px;height:30px;left:50px;top:168px"></span>
+<span class="bush" style="width:18px;height:16px;left:20px;top:264px"></span>`;
+world.appendChild(startPad);
+
+const chick=document.createElement('div');
+chick.id='chick'; chick.className='idle'; chick.innerHTML=CHICK;
+world.appendChild(chick);
+
+/* ── lanes ── */
+function buildLane(k){
+  const el=document.createElement('div');
+  el.style.cssText=`left:${GRASS+k*LW}px;width:${LW}px`;
+  const lane={k,el,cars:[]};
+  if(isMedian(k)){
+    el.className='strip median';
+    el.innerHTML=`<span class="flag">${k}</span><span class="cp">SAFE GROUND</span>
+      <span class="tomb" style="width:17px;height:23px;left:12px;top:96px"></span>
+      <span class="tomb" style="width:14px;height:19px;left:46px;top:196px"></span>
+      <span class="bush" style="width:20px;height:18px;left:20px;top:152px"></span>`;
+  }else{
+    el.className='strip road'+(k%5===4?' zebra':'');
+    el.innerHTML='<i class="paint"></i>';
+    const D2=CONFIG.diff;
+    const r=mulberry32(laneSeed(k));
+    const tier=Math.floor(k/10);
+    const speedMul=1+D2.speedRamp*tier, densMul=1+D2.densityRamp*tier, dir=k%2===0?1:-1;
+    let n=r()<Math.min(.9,D2.twoCarChance*densMul)?2:1;
+    if(tier>=D2.thirdCarTier && r()<Math.min(.55,D2.thirdCarBase*densMul)) n++;
+    for(let i=0;i<n;i++){
+      const e=document.createElement('div');
+      e.className='car '+(dir>0?'down':'up');
+      e.style.background=CAR_COLORS[(r()*CAR_COLORS.length)|0];
+      e.style.left=(LW-40)/2+'px';
+      e.innerHTML='<i class="glass a"></i><i class="glass b"></i><i class="roof"></i>'+
+        '<i class="lamp l"></i><i class="lamp r"></i><i class="tail l"></i><i class="tail r"></i>';
+      el.appendChild(e);
+      const base=(D2.speedMin+r()*D2.speedRange)*speedMul;
+      lane.cars.push({el:e,dir,base,v:base,y:r()*(stageH+320)-160,mode:'go',t:.5+r()*3,
+        rng:mulberry32((laneSeed(k)+Math.imul(i+1,7919))>>>0)});
+    }
+  }
+  world.appendChild(el); lanes.set(k,lane);
+  for(let i=0;i<tick;i++) stepLane(lane);   // fast-forward to now
+  return lane;
+}
+function ensureLanes(){
+  const from=Math.max(0,Math.floor((camX-GRASS)/LW)-1);
+  const to=Math.floor((camX+stageW-GRASS)/LW)+2;
+  for(const [k,l] of lanes) if(k<from-1||k>to+1){l.el.remove();lanes.delete(k);}
+  for(let k=from;k<=to;k++) if(k>=0&&!lanes.has(k)) buildLane(k);
+}
+function stepLane(lane){
+  for(const c of lane.cars){
+    c.t-=DT;
+    if(c.t<=0){
+      const r=c.rng();
+      c.mode=r<.62?'go':r<.87?'slow':'stop';
+      c.t=c.mode==='go'?2+c.rng()*4:.6+c.rng()*1.8;
+    }
+    const target=c.mode==='stop'?0:c.mode==='slow'?c.base*.3:c.base;
+    const dec=target<c.v?620:300, d=target-c.v;
+    c.v+=Math.sign(d)*Math.min(Math.abs(d),dec*DT);
+    c.y+=c.dir*c.v*DT;
+    if(c.dir>0?c.y>stageH+90:c.y<-90){
+      c.y=c.dir>0?-90-c.rng()*240:stageH+90+c.rng()*240;
+      c.mode='go'; c.t=1+c.rng()*3;
+    }
+  }
+}
+
+/* ── one deterministic tick ── */
+function simStep(tickEndMs){
+  ensureLanes();
+  for(const [,l] of lanes) stepLane(l);
+  if(!running) return;
+
+  /* apply taps that truly happened inside this tick */
+  while(tapQueue.length && tapQueue[0]<=tickEndMs){
+    tapQueue.shift();
+    if(readyLeft<=0) doHop();          // taps during the countdown are dropped
+  }
+
+  if(readyLeft>0){
+    readyLeft--;
+    paintReady();
+    if(readyLeft<=0){ hideReady(); invuln=INVULN_TICKS; chick.classList.add('blink'); }
+    return;                            // clock paused, no collision
+  }
+
+  gameTicks++;
+  if(invuln>0){ invuln--; if(invuln<=0) chick.classList.remove('blink'); }
+  else if(step>0 && !isMedian(step-1)){
+    const lane=lanes.get(step-1);
+    if(lane) for(const c of lane.cars){
+      if(Math.abs(c.y-chickY)<HIT){ die(); return; }   /* immediate — no grace to exploit */
+    }
+  }
+  if(gameTicks>=RUN_TICKS) finishRun('time up');
+}
+
+/* ── actions ── */
+function doHop(){
+  step++; inputLog.push(tick); TG.tap();
+  if(step>maxStep){ maxStep=step; liveScore.innerHTML=maxStep+'<small>Lanes</small>'; }
+  chick.classList.remove('idle');
+  const p=document.createElement('div');
+  p.className='pop'; p.textContent='🎃';
+  p.style.cssText=`left:${stepX(step)+14}px;top:${chickY-42}px`;
+  world.appendChild(p); setTimeout(()=>p.remove(),560);
+}
+function die(){
+  lives--; renderLives(); TG.hit();
+  flash.classList.remove('hit'); void flash.offsetWidth; flash.classList.add('hit');
+  /* pumpkin smash — 10 shards + 2 seeds flung outward */
+  const s=document.createElement('div');
+  s.className='splat';
+  s.style.cssText=`left:${stepX(step)}px;top:${chickY}px`;
+  let html='<span class="burst"></span>';
+  for(let i=0;i<12;i++){
+    const a=(Math.PI*2*i)/12 + Math.random()*.5;
+    const dist=30+Math.random()*34;
+    const sz=i%6===0?4:5+Math.random()*4;
+    html+=`<i class="${i%6===0?'seed':''}" style="`+
+      `width:${sz}px;height:${sz*(i%6===0?1:.78)}px;`+
+      `left:${-sz/2}px;top:${-sz/2}px;`+
+      `--dx:${(Math.cos(a)*dist).toFixed(1)}px;`+
+      `--dy:${(Math.sin(a)*dist-8).toFixed(1)}px;`+
+      `--rot:${(Math.random()*540-270).toFixed(0)}deg;`+
+      `animation-delay:${(Math.random()*.05).toFixed(2)}s"></i>`;
+  }
+  s.innerHTML=html;
+  world.appendChild(s); setTimeout(()=>s.remove(),780);
+  tapQueue.length=0;                      // drop panic taps made before the hit
+  if(lives<=0){ finishRun('out of lives'); return; }
+  step=checkpointStep(step);
+  readyLeft=READY_TICKS; lastRNum=-1;
+  chick.classList.add('blink');
+  showReady(step===0?'Back to the start':'Back to checkpoint '+(step-1));
+  tf.classList.add('hold');
+}
+function showReady(cap){ rCap.textContent=cap; readyUI.classList.add('on'); paintReady(); }
+function hideReady(){ readyUI.classList.remove('on'); tf.classList.remove('hold'); }
+function paintReady(){
+  const n=Math.ceil(readyLeft/60);
+  if(n===lastRNum) return;
+  lastRNum=n;
+  rNum.textContent = n>0?n:'GO!';
+  rNum.className='num beat'+(n<=0?' go':'');
+  void rNum.offsetWidth;
+}
+
+/* ── loop ── */
+let last=performance.now(), acc=0;
+function frame(now){
+  /* stop cleanly when superseded by a newer instance or swapped out by the router */
+  if(!alive || !stage.isConnected){ alive=false; return; }
+  const dt=Math.min(.25,(now-last)/1000); last=now;
+  acc+=dt;
+  let guard=0;
+  while(acc>=DT && guard++<8){
+    simStep(runStartPerf + (tick+1)*DT*1000);
+    tick++; acc-=DT;
+  }
+  camX+=(Math.max(0,stepX(step)-stageW*.30)-camX)*Math.min(1,dt*11);
+  world.style.transform=`translateX(${-camX}px)`;
+  chick.style.transform=`translate(${stepX(step)}px,${chickY}px)`;
+  if(running) tf.style.width=(100-gameTicks/RUN_TICKS*100)+'%';
+  for(const [,l] of lanes) for(const c of l.cars){
+    c.el.style.transform=`translateY(${c.y}px)`;
+    c.el.classList.toggle('braking',c.v<c.base*.35);
+  }
+  requestAnimationFrame(frame);
+}
+measure(); addEventListener('resize',measure);
+chick.style.transform=`translate(${stepX(0)}px,${chickY}px)`;
+ensureLanes(); requestAnimationFrame(frame);
+
+/* ═══ panels ═══ */
+function renderInvite(){
+  const n=S.invited,l=livesOf(n),pct=Math.min(n/TIERS[TIERS.length-1].n,1)*100;
+  bonusNum.textContent=l?`+${l} ${l>1?'lives':'life'}`:'—';
+  fill.style.width=pct+'%'; walker.style.left=pct+'%'; walker.innerHTML=CHICK;
+  ['t10','t20','t30'].forEach((id,i)=>
+    document.getElementById(id).classList.toggle('on',n>=TIERS[i].n));
+  const nx=TIERS.find(t=>n<t.n);
+  const head=nx
+    ?`<b>${n}</b> counted · invite <b>${nx.n-n}</b> more for <b>+${nx.l} ${nx.l>1?'lives':'life'}</b>`
+    :`<b>${n}</b> counted · <b>capped at +3 lives</b>, extra invites add nothing`;
+  nextTier.innerHTML=head+(invitePending
+    ?`<br><span style="color:var(--curb)">${invitePending} subscribed but haven't played yet — they count once they do.</span>`
+    :'');
+}
+function renderBoard(){
+  const me=tgId();
+  const yst=boardTab==='yst';
+  const test=CONFIG.claimTestMode;
+  const rows=yst?BOARD_YST:BOARD;
+  const boardDate=yst?ystDate():myDate();
+  const done=CLAIMED.has(boardDate);
+
+  document.querySelectorAll('.lb-tab').forEach(b=>
+    b.classList.toggle('on',b.dataset.tab===boardTab));
+  seasonLeft.className=yst?'settled':'season';
+  mineRow.style.display=yst?'none':'';
+
+  if(!rows.length){
+    lb.innerHTML='<div class="empty">'+(yst
+      ? 'No results yesterday.'
+      : 'No runs yet today — be the first.')+'</div>';
+    return;
+  }
+  lb.innerHTML=rows.map((r,i)=>{
+    const rw=CONFIG.rewards[i]||0;
+    /* claiming only makes sense once the day has settled */
+    const can=test||(yst&&(API.demo||!CONFIG.claimOwnRowOnly||(r.tg&&r.tg===me)));
+    return `<div class="lane-row"><div class="sign ${i<3?'g'+(i+1):''}">${i+1}</div>
+      <div class="who"><h4>${r.u}</h4><p>set at ${r.at||'—'}</p></div>
+      <div class="pts"><b>${r.p}</b><i>${rw} KR COIN</i></div>
+      ${(yst||test)?(done
+          ? `<button class="claim-btn done" disabled>CLAIMED</button>`
+          : `<button class="claim-btn${can?'':' off'}" data-claim="${i+1}"${can?'':' disabled'}>CLAIM${test?' ·TEST':''}</button>`
+        ):''}
+      </div>`;
+  }).join('');
+  lb.querySelectorAll('[data-claim]:not([disabled])').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.claim-1;
+    openClaim(i+1, rows[i]||{}, boardDate);
+  });
+  myTotal.textContent=S.myTotal||'—'; myRank.textContent=S.myRank||'—';
+}
+function renderLives(){
+  livesRow.innerHTML=Array.from({length:maxLives},(_,i)=>
+    `<i class="${i<lives?'on':''}" style="background-image:${CHICK_URI}"></i>`).join('');
+}
+
+/* ═══ states ═══ */
+let cdTimer=null;
+function resetWorld(){
+  for(const [,l] of lanes) l.el.remove();
+  lanes.clear();
+  tick=0; gameTicks=0; step=0; maxStep=0; camX=0;
+  invuln=0; readyLeft=0; inputLog=[]; tapQueue.length=0;
+  chick.classList.remove('blink'); hideReady();
+  ensureLanes();
+}
+function setState(st){
+  clearInterval(cdTimer); cdTimer=null;
+  running=false; resetWorld();
+  veil.classList.remove('off'); hud.classList.add('off'); tapzone.classList.add('off');
+  chick.classList.add('idle');
+
+  if(st==='ready'){
+    const bl=livesOf(S.invited);
+    veil.innerHTML=`<div class="eyebrow">Today · 1 run left</div>
+      <p class="hint">60 seconds. Tap to hop one lane at a time.<br>
+      <b>${3+bl} lives</b> — 3 base${bl?` + ${bl} from invites`:''}.<br>
+      Get hit and you restart from the last green checkpoint.</p>
+      <div class="verify">SERVER-SEEDED ROAD · REPLAY VERIFIED</div>`;
+    cta.innerHTML=`<button class="btn" id="startBtn">START RUN</button>`;
+    $('startBtn').onclick=play;
+  }
+  if(st==='cooldown'){
+    veil.innerHTML=`<div class="eyebrow">Next run unlocks in</div>
+      <div class="clock" id="cd">--:--:--</div>
+      <p class="hint">Today's run is done. Resets at <b>00:00 UTC+8</b> with a fresh road.</p>`;
+    cta.innerHTML=`<button class="btn" disabled>COME BACK TOMORROW</button>`;
+    cdTimer=setInterval(()=>{const e=document.getElementById('cd');if(e)e.textContent=hms(untilMidnight());},250);
+  }
+  if(st==='result') showResult(47,1,'time up',52,false);
+  wireJumps();
+}
+function shareInvite(){
+  TG.openTg('https://t.me/share/url?url='+encodeURIComponent(inviteLink)+
+            '&text='+encodeURIComponent(CONFIG.shareText));
+}
+const wireJumps=()=>{
+  document.querySelectorAll('[data-jump]').forEach(b=>b.onclick=()=>setState(b.dataset.jump));
+  document.querySelectorAll('[data-share]').forEach(b=>b.onclick=shareInvite);
+};
+
+function showResult(score,livesLeft,reason,inputs,add){
+  if(add) S.myTotal=score;
+  running=false; hideReady();
+  veil.classList.remove('off'); hud.classList.add('off'); tapzone.classList.add('off');
+  veil.innerHTML=`<div class="eyebrow">Run over · ${reason}</div>
+    <div class="score">${score}</div>
+    <p class="hint">lanes crossed · ${livesLeft} ${livesLeft===1?'life':'lives'} left<br>
+    today's rank ${S.myRank||'—'} · board resets at 00:00</p>
+    <div class="verify">${inputs} INPUTS LOGGED · AWAITING SERVER REPLAY</div>`;
+  const nx=TIERS.find(t=>S.invited<t.n);
+  cta.innerHTML=`<button class="btn" data-share="1">
+      ${nx?`INVITE ${nx.n-S.invited} MORE · +${nx.l} ${nx.l>1?'LIVES':'LIFE'}`:'SHARE THE GROUP'}</button>
+    <div style="text-align:center"><button class="linkish" data-jump="cooldown">See next run timer</button></div>`;
+  renderBoard(); wireJumps();
+}
+
+/* ═══ run ═══ */
+async function play(){
+  const btn=document.getElementById('startBtn');
+  if(btn){ btn.disabled=true; btn.textContent='CONNECTING…'; }
+  let info;
+  try{ info=await API.startRun(); }
+  catch(err){
+    log('startRun failed',err);
+    if(btn){ btn.disabled=false; btn.textContent='START RUN'; }
+    TG.alert('Could not reach the server. Please try again.');
+    return;
+  }
+  applySeed(info.seed);
+  RUN_TOKEN=info.runToken;
+  if(typeof info.invited==='number'){ S.invited=info.invited; renderInvite(); }
+  beginRun(info.lives);
+}
+function beginRun(serverLives){
+  resetWorld();
+  runStartPerf=performance.now(); last=runStartPerf; acc=0;
+  maxLives=serverLives||CONFIG.baseLives+livesOf(S.invited); lives=maxLives; renderLives();
+  seedChip.textContent='SEED #'+SEED_LABEL;
+  veil.classList.add('off'); hud.classList.remove('off'); tapzone.classList.remove('off');
+  chick.classList.remove('idle');
+  liveScore.innerHTML='0<small>Lanes</small>';
+  tf.style.width='100%'; tf.classList.remove('warn');
+  cta.innerHTML=`<div style="text-align:center"><button class="linkish" id="skip">End run early</button></div>`;
+  readyLeft=READY_TICKS; lastRNum=-1;
+  showReady('Get ready'); tf.classList.add('hold');
+  running=true;
+  TG.back(true,()=>TG.confirm('Quit? Today\'s run will be used up.',ok=>{ if(ok) finishRun('quit'); }));
+  document.getElementById('skip').onclick=()=>finishRun('ended early');
+}
+function finishRun(reason){
+  running=false; hideReady(); tapQueue.length=0; TG.back(false);
+  const payload={runToken:RUN_TOKEN,inputs:inputLog.slice(),
+                 claimedScore:maxStep,livesLeft:Math.max(0,lives),reason};
+  showResult(maxStep,Math.max(0,lives),reason,inputLog.length,true);
+  API.submitRun(payload).then(r=>{
+    log('submit',r);
+    if(r&&r.duplicate) TG.alert('You have already played today. Come back after 00:00 UTC+8.');
+    else if(r&&r.verified===false) TG.alert('This run could not be verified and was not counted.');
+    else if(r&&typeof r.score==='number'&&r.score!==maxStep)
+      TG.alert('Server score: '+r.score+' lanes.');
+  }).catch(e=>log('submit failed',e));
+}
+
+/* ═══ input ═══ */
+tapzone.addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  if(running) tapQueue.push(performance.now());
+});
+addEventListener('keydown',e=>{
+  if(e.code==='Space'&&running){e.preventDefault();tapQueue.push(performance.now());}
+});
+
+copyBtn.onclick=()=>{navigator.clipboard?.writeText(link.value);
+  copyBtn.textContent='Copied'; setTimeout(()=>copyBtn.textContent='Copy',1400);};
+
+const houseKeeping=setInterval(()=>{
+  if(!alive || !stage.isConnected){ clearInterval(houseKeeping); clearInterval(cdTimer); alive=false; return; }
+  paintClock();
+  if(running) tf.classList.toggle('warn',(RUN_TICKS-gameTicks)/60<=10);
+},250);
+
+TG.init();
+TG.onViewport(measure);
+
+/* ── referral capture ──────────────────────────────────────
+   The invite link opens this Mini App directly with
+   ?startapp=ref_<referrerId>. No bot webhook needed: the
+   friend has to open the game anyway for the referral to
+   count, so we record it right here.                        */
+/* ═══ CLAIM ════════════════════════════════════════════════
+   Malaysian mobiles are +60 followed by 1X and 7–8 more
+   digits. We store the national part without the leading 0.
+   ══════════════════════════════════════════════════════════ */
+let claimCtx=null;
+function normPhone(v){
+  let d=String(v||'').replace(/\D/g,'');
+  if(d.startsWith('60')) d=d.slice(2);
+  if(d.startsWith('0'))  d=d.slice(1);
+  return d;
+}
+const validMY=d=>/^1[0-9]{8,9}$/.test(d);
+
+function openClaim(rank,row,forDate){
+  const date=forDate||ystDate();
+  if(CLAIMED.has(date)){ TG.alert('You have already claimed this reward.'); return; }
+  claimCtx={rank,row,date,credit:CONFIG.rewards[rank-1]||0};
+  cmTitle.textContent='Rank #'+rank+' · '+claimCtx.credit+' KR Coin';
+  cmPhone.value=''; cmErr.textContent=''; cmRow.classList.remove('bad');
+  cmYes.disabled=false; cmYes.textContent='YES';
+  cmForm.hidden=false; cmDone.hidden=true;
+  claimModal.hidden=false;
+  setTimeout(()=>cmPhone.focus(),80);
+}
+function closeClaim(){ claimModal.hidden=true; claimCtx=null; }
+
+async function submitClaim(){
+  if(!claimCtx) return;
+  const d=normPhone(cmPhone.value);
+  if(!validMY(d)){
+    cmRow.classList.add('bad');
+    cmErr.textContent='Enter a valid Malaysian mobile, e.g. 12 345 6789';
+    return;
+  }
+  cmRow.classList.remove('bad'); cmErr.textContent='';
+  cmYes.disabled=true; cmYes.textContent='SENDING…';
+
+  /* 1 — keep our own record first, so the claim exists even if
+         the player never presses START in the bot chat */
+  if(!API.demo){
+    try{
+      await SB.insert('cr_claims',{
+        tg_id: tgId(), tg_username: tgName(), phone: d,
+        claim_date: claimCtx.date, rank: claimCtx.rank,
+        score: claimCtx.row.p||0, credit: claimCtx.credit
+      });
+    }catch(e){
+      const m=String(e.message||e);
+      cmYes.disabled=false; cmYes.textContent='YES';
+      cmErr.textContent=/409|duplicate/i.test(m)
+        ? 'You have already claimed this reward.'
+        : m.slice(0,120);
+      if(/409|duplicate/i.test(m)){ CLAIMED.add(claimCtx.date); renderBoard(); }
+      return;
+    }
+  }
+
+  /* 2 — hand the details to the bot through the start payload.
+         Telegram only allows [A-Za-z0-9_-] there.
+              payload   60123456789_10_6wyHle3kHY
+                        <phone>_<credit>_<token>
+         Bot side:  const [phone, credit, token] = payload.split('_')
+         The amount comes from CONFIG.rewards[rank-1].              */
+  const payload='60'+d+'_'+claimCtx.credit+'_'+CONFIG.claimToken;
+
+  CLAIMED.add(claimCtx.date);
+  renderBoard();
+  TG.win();
+  TG.openTg('https://t.me/'+CONFIG.botName+'?start='+payload);
+  closeClaim();
+}
+
+function paintClock(){
+  seasonLeft.textContent = boardTab==='yst'
+    ? 'Final · claimable'
+    : 'Resets in '+hms(untilMidnight());
+}
+function refSay(msg,color){
+  if(!DEBUG) return;                 // players never see the diagnostics
+  const box=document.getElementById('refStatus');
+  if(!box) return;
+  box.style.display='block';
+  box.style.color=color||'var(--dusk)';
+  box.innerHTML=msg;
+}
+(function captureReferral(){
+  const say=refSay;
+
+  const param=TG.startParam||'';
+  const me=tgId();
+
+  /* always visible while testing — tells you exactly where it stopped */
+  say('id <b>'+me+'</b> · param <b>'+(param||'(none)')+'</b>');
+
+  if(!SB.on)   return say('⚠ Supabase not configured','var(--brake)');
+  if(!TG.user) return say('⚠ not opened from Telegram — no user id','var(--brake)');
+  if(!param)   return say('id <b>'+me+'</b> · opened without an invite code');
+
+  const m=/^ref_(\d+)$/.exec(param);
+  if(!m)          return say('⚠ bad invite code: <b>'+param+'</b>','var(--brake)');
+  if(m[1]===me)   return say('⚠ that is your own link — test with another account','var(--brake)');
+
+  say('saving referral from <b>'+m[1]+'</b>…','var(--curb)');
+  SB.insert('cr_refs',{invitee_id:me,invitee_name:tgName(),referrer_id:m[1]})
+   .then(r=>say(r.duplicate
+      ? '✓ already linked to a referrer'
+      : '✓ referral saved → <b>'+m[1]+'</b>','var(--grass)'))
+   .catch(e=>say('✗ '+e.message,'var(--brake)'));
+})();
+
+/* all outbound links go through Telegram's opener */
+if(!document.body.dataset.crLinks){
+  document.body.dataset.crLinks='1';
+  document.body.addEventListener('click',e=>{
+    const a=e.target.closest('a[href^="http"]');
+    if(!a) return;
+    e.preventDefault();
+    if(a.href.indexOf('t.me/')>-1) TG.openTg(a.href); else TG.open(a.href);
+  });
+}
+
+inviteLink=myInviteLink(); link.value=inviteLink;
+cmNo.onclick=closeClaim;
+cmClose.onclick=closeClaim;
+cmYes.onclick=submitClaim;
+cmOpenBot.onclick=()=>{ TG.openTg('https://t.me/'+CONFIG.botName); closeClaim(); };
+cmPhone.addEventListener('input',()=>{
+  cmRow.classList.remove('bad'); cmErr.textContent='';
+});
+cmPhone.addEventListener('keydown',e=>{ if(e.key==='Enter') submitClaim(); });
+claimModal.addEventListener('click',e=>{ if(e.target===claimModal) closeClaim(); });
+
+document.querySelectorAll('.lb-tab').forEach(b=>b.onclick=()=>{
+  boardTab=b.dataset.tab; renderBoard(); paintClock();
+});
+renderInvite(); renderBoard(); setState('ready');
+
+/* pull real state; demo mode returns the mocks unchanged */
+API.state().then(st=>{
+  if(!st) return;
+  if(typeof st.invited==='number') S.invited=st.invited;
+  if(typeof st.myTotal==='number')  S.myTotal=st.myTotal;
+  if(typeof st.myRank==='number')   S.myRank=st.myRank;
+  if(st.inviteLink){ inviteLink=st.inviteLink; link.value=inviteLink; }
+  if(Array.isArray(st.leaderboard)){
+    BOARD.length=0; st.leaderboard.forEach(r=>BOARD.push(r));
+  }
+  if(Array.isArray(st.yesterday)){
+    BOARD_YST.length=0; st.yesterday.forEach(r=>BOARD_YST.push(r));
+  }
+  if(Array.isArray(st.claims)){ CLAIMED.clear(); st.claims.forEach(d=>CLAIMED.add(d)); }
+  renderInvite(); renderBoard();
+  if(st.inviteErr) refSay('✗ invite stats: '+st.inviteErr,'var(--brake)');
+  else if(typeof st.inviteTotal==='number')
+    refSay('stats · total <b>'+st.inviteTotal+'</b> · valid <b>'+st.inviteValid+'</b>',
+           st.inviteValid?'var(--grass)':'var(--dusk)');
+  if(st.canPlay===false) setState('cooldown');
+}).catch(e=>log('state failed',e));
+
+log(TG.inside?('running inside Telegram · user '+((TG.user||{}).id||'?')):'running in a plain browser');
+log('booted · seed #'+SEED_LABEL);
+return true;
+}  /* ── end boot() ── */
+
+/* auto-boot for a normal page load (silent if the markup isn't there yet) */
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>boot(true));
+else boot(true);
+
+/* manual hook for SPA routers that inject markup after the script runs */
+window.ChickyRoad={ boot:function(){ return boot(false); } };
+})();
+</script>
+</body>
+</html>
