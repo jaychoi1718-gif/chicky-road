@@ -334,8 +334,53 @@ details[open] summary{color:var(--curb)}
 .bn-box{position:relative;width:100%;max-width:340px;
   animation:bnPop .34s cubic-bezier(.2,1.3,.4,1)}
 @keyframes bnPop{from{transform:scale(.88);opacity:0}to{transform:scale(1);opacity:1}}
-.bn-box img{display:block;width:100%;height:auto;border-radius:16px;
-  box-shadow:0 22px 60px rgba(0,0,0,.65);background:var(--asphalt-deep)}
+/* ── built-in CSS banner ── */
+.bn-art{position:relative;overflow:hidden;border-radius:16px;padding:18px 16px 16px;
+  text-align:center;box-shadow:0 22px 60px rgba(0,0,0,.65);
+  background:
+    radial-gradient(90px 90px at 84% 12%,rgba(255,250,225,.5),transparent 62%),
+    radial-gradient(150% 80% at 50% 108%,#F2F7FF 0%,#CFE0F2 22%,transparent 55%),
+    linear-gradient(180deg,#152A4A,#0E1D35 58%,#16304F)}
+.bn-art .flake{position:absolute;color:#fff;opacity:.5;pointer-events:none;
+  animation:bnFall linear infinite}
+@keyframes bnFall{to{transform:translateY(330px) rotate(240deg)}}
+.bn-moon{position:absolute;top:14px;right:18px;width:44px;height:44px;border-radius:50%;
+  background:radial-gradient(circle at 36% 34%,#FFFBEA,#F2E3AE);
+  box-shadow:0 0 26px 9px rgba(255,248,214,.4)}
+.bn-chick{position:relative;width:76px;margin:0 auto -6px;filter:drop-shadow(0 7px 9px rgba(0,0,0,.5))}
+.bn-chick svg{width:100%;height:auto;display:block}
+.bn-sign{position:relative;margin:10px 0 0;padding:12px 10px 13px;border-radius:9px;
+  background:repeating-linear-gradient(180deg,#8A5A2B 0 9px,#7C5026 9px 18px);
+  box-shadow:0 6px 0 #5B3A1B,0 12px 20px rgba(0,0,0,.45),
+             inset 0 2px 0 rgba(255,255,255,.14)}
+.bn-sign::before,.bn-sign::after{content:"";position:absolute;top:-7px;width:100%;left:0;
+  height:9px;border-radius:9px 9px 0 0;background:#F2F7FF;opacity:.95}
+.bn-sign::after{display:none}
+.bn-sign b,.bn-sign i{display:block;font-family:'Bungee';font-style:normal;line-height:.96}
+.bn-l1{font-size:30px;color:#FFD74A;
+  text-shadow:0 2px 0 #C78A12,0 4px 0 #8E5F08,0 7px 12px rgba(0,0,0,.5)}
+.bn-l2{font-size:19px;color:#fff;margin:3px 0 2px;
+  text-shadow:0 2px 0 #7C8EA6,0 4px 9px rgba(0,0,0,.5)}
+.bn-l3{font-size:27px;color:#FFD74A;
+  text-shadow:0 2px 0 #C78A12,0 4px 0 #8E5F08,0 7px 12px rgba(0,0,0,.5)}
+.bn-ribbon{position:relative;margin:11px -4px 0;padding:9px 12px;border-radius:7px;
+  background:linear-gradient(180deg,#E03A32,#B81F1F);
+  box-shadow:0 4px 0 #8C1515,0 9px 16px rgba(0,0,0,.4);
+  font-size:11.5px;line-height:1.5;color:#FFEFEF;font-weight:600}
+.bn-ribbon em{font-style:normal;color:#FFD74A;font-weight:700}
+.bn-cards{display:flex;gap:7px;margin-top:13px}
+.bn-card{flex:1;border-radius:10px;padding:9px 4px 7px;
+  background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.05));
+  border:1px solid rgba(255,255,255,.2);box-shadow:0 5px 12px rgba(0,0,0,.35)}
+.bn-icon{height:40px;display:grid;place-items:center;font-size:27px;line-height:1}
+.bn-wheel{width:36px;height:36px;border-radius:50%;
+  background:conic-gradient(#E8342F 0 60deg,#F0C24B 60deg 120deg,#2E8B4F 120deg 180deg,
+                            #E8342F 180deg 240deg,#F0C24B 240deg 300deg,#2E8B4F 300deg 360deg);
+  box-shadow:0 0 0 3px #F2F7FF,0 3px 7px rgba(0,0,0,.45);
+  animation:bnSpin 7s linear infinite}
+@keyframes bnSpin{to{transform:rotate(360deg)}}
+.bn-card span{display:block;margin-top:5px;font-family:'Barlow Semi Condensed';
+  font-weight:700;font-size:9.5px;letter-spacing:.07em;color:#FFF;text-transform:uppercase}
 .bn-x{position:absolute;top:-13px;right:-13px;width:34px;height:34px;
   border:0;border-radius:50%;cursor:pointer;font-size:19px;line-height:1;
   background:var(--lane);color:#0D1726;box-shadow:0 5px 14px rgba(0,0,0,.5)}
@@ -379,7 +424,7 @@ details[open] summary{color:var(--curb)}
 .hidden{display:none !important}
 @media (prefers-reduced-motion:reduce){
   #chick,.pop,.splat,.splat i,.splat .burst,#chick.idle,.ready .num,
-  .bat,.bat .w,.fog,.score{transition:none;animation:none}
+  .bat,.fog,.score,.bn-art .flake,.bn-wheel{transition:none;animation:none}
   .bat{display:none}
 }
 </style>
@@ -538,7 +583,45 @@ details[open] summary{color:var(--curb)}
 <div class="bn-wrap" id="bannerWrap" hidden>
   <div class="bn-box">
     <button class="bn-x" id="bannerX" aria-label="Close">&times;</button>
-    <img id="bannerImg" alt="Event banner">
+    <div class="bn-art" id="bannerArt" hidden>
+      <span class="bn-moon"></span>
+      <span class="flake" style="left:8%;font-size:13px;animation-duration:9s">❄</span>
+      <span class="flake" style="left:30%;font-size:9px;animation-duration:13s;animation-delay:-4s">❄</span>
+      <span class="flake" style="left:58%;font-size:11px;animation-duration:11s;animation-delay:-7s">❅</span>
+      <span class="flake" style="left:88%;font-size:8px;animation-duration:15s;animation-delay:-2s">❄</span>
+
+      <div class="bn-chick">
+        <svg viewBox="0 0 64 56" aria-hidden="true">
+          <ellipse cx="32" cy="52" rx="15" ry="3" fill="rgba(0,0,0,.3)"/>
+          <ellipse cx="32" cy="34" rx="17" ry="16" fill="#FFF8EC"/>
+          <ellipse cx="32" cy="25" rx="13" ry="12" fill="#FFFDF7"/>
+          <circle cx="27" cy="24" r="2.6" fill="#1B2836"/><circle cx="37" cy="24" r="2.6" fill="#1B2836"/>
+          <circle cx="27.9" cy="23.2" r="1" fill="#fff"/><circle cx="37.9" cy="23.2" r="1" fill="#fff"/>
+          <path d="M32 28l-5 3 5 3 5-3z" fill="#F4A93D"/>
+          <path d="M20 40q12 6 24 0 -3 7 -12 7T20 40z" fill="#E8342F"/>
+          <path d="M32 0 C24 2 20 9 19 15 h26 C44 9 40 2 32 0 Z" fill="#E8342F"/>
+          <ellipse cx="32" cy="16" rx="14" ry="3.6" fill="#FFFFFF"/>
+          <circle cx="45" cy="4" r="4" fill="#FFFFFF"/>
+        </svg>
+      </div>
+
+      <div class="bn-sign">
+        <b class="bn-l1">WINNER</b>
+        <i class="bn-l2">FREE</i>
+        <b class="bn-l3">KR COINS</b>
+      </div>
+
+      <p class="bn-ribbon">
+        Spend your KR Coin across our mini games —<br>
+        <em>Lucky Spin</em> · <em>Penalty Kick</em> · <em>Smash Egg</em>
+      </p>
+
+      <div class="bn-cards">
+        <div class="bn-card"><div class="bn-icon"><span class="bn-wheel"></span></div><span>Lucky Spin</span></div>
+        <div class="bn-card"><div class="bn-icon">⚽</div><span>Penalty Kick</span></div>
+        <div class="bn-card"><div class="bn-icon">🥚</div><span>Smash Egg</span></div>
+      </div>
+    </div>
     <button class="bn-cta" id="bannerGo">LET'S GO</button>
   </div>
 </div>
@@ -607,9 +690,8 @@ const CONFIG={
      real claim from a hand-typed one. Must match the bot side.   */
   claimToken      : '6wyHle3kHY',
 
-  /* Welcome banner shown on every open. Put the image next to
-     index.html. Set to '' to turn the banner off.             */
-  banner          : 'banner.jpg',
+  /* Welcome banner shown on every open. Set to false to hide it. */
+  banner          : true,
 
   /* Testing helper. true = CLAIM appears on both tabs, on every
      row, for anyone. MUST stay false in production.            */
@@ -699,7 +781,7 @@ function boot(auto){
         cmDone=$('cmDone'), cmDoneMsg=$('cmDoneMsg'), cmTitle=$('cmTitle'),
         cmPhone=$('cmPhone'), cmErr=$('cmErr'), cmRow=$('cmRow'),
         cmYes=$('cmYes'), cmNo=$('cmNo'), cmClose=$('cmClose'), cmOpenBot=$('cmOpenBot'),
-        bannerWrap=$('bannerWrap'), bannerImg=$('bannerImg'),
+        bannerWrap=$('bannerWrap'), bannerArt=$('bannerArt'),
         bannerX=$('bannerX'), bannerGo=$('bannerGo');
 
   const missing=Object.entries({flash,readyUI,rNum,rCap,veil,hud,tapzone,cta,liveScore,
@@ -1427,9 +1509,8 @@ inviteLink=myInviteLink(); link.value=inviteLink;
    backdrop tap or Escape. Only appears once the image loads, so a
    missing file never leaves a blank overlay in the way.        */
 if(CONFIG.banner){
-  bannerImg.onload =()=>{ bannerWrap.hidden=false; };
-  bannerImg.onerror=()=>{ log('banner failed:',CONFIG.banner); };
-  bannerImg.src=CONFIG.banner;
+  bannerArt.hidden=false;
+  bannerWrap.hidden=false;
 }
 const closeBanner=()=>{ bannerWrap.hidden=true; };
 bannerX.onclick=closeBanner;
