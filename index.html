@@ -15,24 +15,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  /* ── HALLOWEEN ─────────────────────────────────────────
-     asphalt  midnight purple road
-     curb     pumpkin orange — the signature accent
-     grass    graveyard green
-     brake    blood red                                    */
-  --asphalt:#241B31;--asphalt-deep:#15101F;--asphalt-lift:#332644;
-  --lane:#EDE6F5;--curb:#FF8A1F;--grass:#5FCB63;--brake:#FF3B3B;
-  --dusk:#8B7FA3;--hair:rgba(237,230,245,.10);
-  --verge-a:#2E4A2B;--verge-b:#1C2F1B;
-  --pumpkin:#E8721C;--stem:#4B7A2E;
+  /* ── CHRISTMAS ─────────────────────────────────────────
+     asphalt  midnight blue road
+     curb     warm gold — the signature accent
+     grass    pine green
+     brake    sleigh red                                   */
+  --asphalt:#17243A;--asphalt-deep:#0D1726;--asphalt-lift:#24354F;
+  --lane:#EAF2FF;--curb:#F0C24B;--grass:#3FAF5C;--brake:#E8342F;
+  --dusk:#7D8FA8;--hair:rgba(234,242,255,.10);
+  --verge-a:#2B4A38;--verge-b:#1A2F26;
+  --gift:#D92B2B;--ribbon:#F0C24B;--snow:#F2F7FF;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
 body{padding-bottom:calc(28px + env(safe-area-inset-bottom,0px)) !important}
 body{font-family:'Barlow',system-ui,sans-serif;
   background:
-    radial-gradient(420px 300px at 82% 6%,rgba(255,138,31,.14) 0%,transparent 70%),
-    radial-gradient(1100px 620px at 50% -10%,#3A2A4E 0%,transparent 62%),
+    radial-gradient(420px 300px at 82% 6%,rgba(240,194,75,.14) 0%,transparent 70%),
+    radial-gradient(1100px 620px at 50% -10%,#24405E 0%,transparent 62%),
     var(--asphalt-deep);
   color:var(--lane);min-height:100vh;display:flex;justify-content:center;
   padding:0 0 96px;-webkit-font-smoothing:antialiased}
@@ -59,22 +59,20 @@ body{font-family:'Barlow',system-ui,sans-serif;
 .bat{position:absolute;z-index:3;pointer-events:none;opacity:.5;
   width:20px;height:20px;will-change:transform}
 .bat svg{width:100%;height:100%;display:block}
-.bat .w{transform-origin:50% 55%;animation:flap .32s ease-in-out infinite alternate}
-.bat .w.r{animation-delay:-.16s}
-@keyframes flap{from{transform:scaleY(1) scaleX(1)}to{transform:scaleY(.42) scaleX(1.08)}}
-.bat.a{top:8%;  animation:swoop1 19s linear infinite}
-.bat.b{top:26%; animation:swoop2 26s linear infinite; animation-delay:-9s; opacity:.34}
-@keyframes swoop1{
-  0%{transform:translate(-14vw,0) scale(.9)}
-  50%{transform:translate(50vw,26px) scale(1.05)}
-  100%{transform:translate(118vw,-8px) scale(.9)}}
-@keyframes swoop2{
-  0%{transform:translate(118vw,0) scale(.7) scaleX(-1)}
-  50%{transform:translate(50vw,-22px) scale(.82) scaleX(-1)}
-  100%{transform:translate(-14vw,10px) scale(.7) scaleX(-1)}}
 
-.web{position:absolute;top:0;width:62px;height:62px;z-index:4;
-  pointer-events:none;opacity:.55}
+.bat.a{top:-6%;left:18%;animation:fall1 11s linear infinite}
+.bat.b{top:-6%;left:66%;animation:fall2 15s linear infinite;animation-delay:-6s;opacity:.4}
+@keyframes fall1{
+  0%{transform:translate(0,0) rotate(0deg)}
+  50%{transform:translate(26px,190px) rotate(180deg)}
+  100%{transform:translate(-14px,400px) rotate(360deg)}}
+@keyframes fall2{
+  0%{transform:translate(0,0) rotate(0deg) scale(.75)}
+  50%{transform:translate(-30px,200px) rotate(-180deg) scale(.75)}
+  100%{transform:translate(12px,400px) rotate(-360deg) scale(.75)}}
+
+.web{position:absolute;top:0;width:74px;height:40px;z-index:4;
+  pointer-events:none;opacity:.9}
 .web svg{width:100%;height:100%;display:block}
 .web.l{left:0}
 .web.r{right:0;transform:scaleX(-1)}
@@ -107,22 +105,22 @@ body{font-family:'Barlow',system-ui,sans-serif;
   color:var(--curb) !important;
   font-family:'Barlow Semi Condensed';font-weight:600;font-size:9px;letter-spacing:.14em;
   color:rgba(255,255,255,.75);white-space:nowrap}
-.tomb{position:absolute;background:linear-gradient(180deg,#A79CB5,#867B94);
-  border-radius:9px 9px 2px 2px;
-  box-shadow:0 3px 0 #5E5470,0 6px 9px rgba(0,0,0,.4),inset 0 -5px 7px rgba(0,0,0,.18)}
-.tomb::before{content:"";position:absolute;left:50%;top:22%;width:2px;height:40%;
-  margin-left:-1px;background:rgba(40,30,55,.34);border-radius:1px}
-.tomb::after{content:"";position:absolute;left:24%;top:36%;width:52%;height:2px;
-  background:rgba(40,30,55,.34);border-radius:1px}
-.bush{position:absolute;border-radius:50%;
-  background:
-    radial-gradient(circle at 30% 28%,rgba(255,255,255,.22),transparent 45%),
-    linear-gradient(180deg,var(--pumpkin),#B4500F);
-  box-shadow:0 4px 0 rgba(0,0,0,.28),inset 0 -3px 5px rgba(0,0,0,.25)}
-.bush::before{content:"";position:absolute;left:50%;top:-5px;width:4px;height:8px;
-  margin-left:-2px;border-radius:2px;background:var(--stem)}
-.bush::after{content:"";position:absolute;inset:14% 34%;border-radius:50%;
-  box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
+.tomb{position:absolute;border-radius:50%;
+  background:radial-gradient(circle at 34% 30%,#fff,var(--snow) 55%,#CBD9EA);
+  box-shadow:0 4px 9px rgba(0,0,0,.4)}
+.tomb::before{content:"";position:absolute;left:12%;top:-62%;width:76%;height:66%;
+  border-radius:50%;background:radial-gradient(circle at 36% 32%,#fff,#DCE7F5);
+  box-shadow:0 3px 7px rgba(0,0,0,.35)}
+.tomb::after{content:"";position:absolute;left:28%;top:-40%;width:44%;height:6px;
+  border-radius:2px;background:var(--gift);
+  box-shadow:0 -5px 0 -1px #B81F1F}
+.bush{position:absolute;border-radius:3px;
+  background:linear-gradient(180deg,var(--gift),#9E1B1B);
+  box-shadow:0 4px 0 rgba(0,0,0,.3),inset 0 -3px 6px rgba(0,0,0,.22)}
+.bush::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:4px;
+  margin-left:-2px;background:var(--ribbon)}
+.bush::after{content:"";position:absolute;left:0;right:0;top:38%;height:4px;
+  background:var(--ribbon)}
 
 .car{position:absolute;width:40px;height:70px;border-radius:8px;
   box-shadow:0 8px 18px rgba(0,0,0,.5);will-change:transform}
@@ -154,15 +152,15 @@ body{font-family:'Barlow',system-ui,sans-serif;
   100%{transform:translateY(-46px) rotate(18deg);opacity:0}}
 .splat{position:absolute;z-index:6;width:0;height:0;pointer-events:none}
 .splat i{position:absolute;display:block;border-radius:2px 4px 3px 5px;
-  background:var(--pumpkin);box-shadow:inset 0 -2px 3px rgba(0,0,0,.3);
+  background:var(--gift);box-shadow:inset 0 -2px 3px rgba(0,0,0,.3);
   animation:shard .72s cubic-bezier(.2,.7,.4,1) forwards}
-.splat i:nth-child(even){background:#B4500F}
-.splat i.seed{background:#F2E3B8;border-radius:50%}
+.splat i:nth-child(even){background:var(--ribbon)}
+.splat i.seed{background:var(--snow);border-radius:50%}
 @keyframes shard{
   0%  {transform:translate(0,0) rotate(0deg) scale(1);opacity:1}
   100%{transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(.35);opacity:0}}
 .splat .burst{position:absolute;left:-26px;top:-26px;width:52px;height:52px;
-  border-radius:50%;background:radial-gradient(circle,rgba(255,138,31,.55),transparent 65%);
+  border-radius:50%;background:radial-gradient(circle,rgba(242,247,255,.6),transparent 65%);
   animation:burst .4s ease-out forwards}
 @keyframes burst{to{transform:scale(2.1);opacity:0}}
 .flash{position:absolute;inset:0;z-index:7;background:var(--brake);opacity:0;pointer-events:none}
@@ -211,13 +209,13 @@ body{font-family:'Barlow',system-ui,sans-serif;
 .hint b{color:var(--lane);font-weight:600}
 .score{font-family:'Barlow Condensed';font-weight:700;font-size:74px;line-height:.85;
   font-variant-numeric:tabular-nums;color:var(--curb);
-  text-shadow:0 4px 0 rgba(0,0,0,.45),0 0 26px rgba(255,138,31,.55),
-              0 0 60px rgba(255,138,31,.28);
+  text-shadow:0 4px 0 rgba(0,0,0,.45),0 0 26px rgba(240,194,75,.55),
+              0 0 60px rgba(240,194,75,.28);
   animation:emberGlow 2.6s ease-in-out infinite alternate}
 @keyframes emberGlow{
-  to{text-shadow:0 4px 0 rgba(0,0,0,.45),0 0 34px rgba(255,138,31,.8),
-                 0 0 78px rgba(255,138,31,.4)}}
-.live{text-shadow:0 3px 0 rgba(0,0,0,.5),0 0 18px rgba(255,138,31,.45) !important}
+  to{text-shadow:0 4px 0 rgba(0,0,0,.45),0 0 34px rgba(240,194,75,.8),
+                 0 0 78px rgba(240,194,75,.4)}}
+.live{text-shadow:0 3px 0 rgba(0,0,0,.5),0 0 18px rgba(240,194,75,.45) !important}
 .verify{font-family:'Barlow Semi Condensed';font-weight:600;font-size:10px;
   letter-spacing:.1em;color:var(--grass);border:1px solid rgba(63,191,127,.35);
   padding:5px 10px;border-radius:6px}
@@ -229,9 +227,9 @@ body{font-family:'Barlow',system-ui,sans-serif;
 .pad{padding:16px}
 .btn{display:block;width:100%;border:0;cursor:pointer;text-align:center;text-decoration:none;
   font-family:'Bungee';font-size:14px;letter-spacing:.05em;padding:17px;border-radius:12px;
-  color:#1B1128;background:var(--curb);box-shadow:0 4px 0 #A8480A;
+  color:#1B1128;background:var(--curb);box-shadow:0 4px 0 #B38A20;
   transition:transform .08s,box-shadow .08s}
-.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #A8480A}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #B38A20}
 .btn.go{background:var(--grass);box-shadow:0 4px 0 #2E9161;color:#0B1A13}
 .btn.go:active{box-shadow:0 1px 0 #2E9161}
 .btn:disabled{background:var(--asphalt-lift);color:var(--dusk);box-shadow:none;cursor:not-allowed}
@@ -306,8 +304,8 @@ body{font-family:'Barlow',system-ui,sans-serif;
   justify-content:space-between;align-items:center;font-size:13px;color:var(--dusk)}
 .mine b{font-family:'Barlow Condensed';font-size:19px;color:var(--lane);font-variant-numeric:tabular-nums}
 
-.claim{border-color:rgba(255,138,31,.4);
-  background:linear-gradient(180deg,rgba(255,138,31,.13),rgba(255,138,31,.03))}
+.claim{border-color:rgba(240,194,75,.4);
+  background:linear-gradient(180deg,rgba(240,194,75,.13),rgba(240,194,75,.03))}
 .claim .pad{text-align:center}
 .claim h3{font-family:'Bungee';font-size:17px;margin:9px 0 6px}
 .claim p{font-size:13px;color:var(--dusk);line-height:1.55;margin-bottom:15px}
@@ -327,6 +325,26 @@ details[open] summary{color:var(--curb)}
 .body li{margin-bottom:7px}
 .body b{color:var(--lane);font-weight:600}
 .body .warn{color:var(--brake);font-weight:600}
+
+.bn-wrap{position:fixed;inset:0;z-index:70;display:flex;align-items:center;
+  justify-content:center;padding:26px 18px;background:rgba(6,12,22,.86);
+  backdrop-filter:blur(5px);animation:bnIn .25s ease-out}
+.bn-wrap[hidden]{display:none}
+@keyframes bnIn{from{opacity:0}to{opacity:1}}
+.bn-box{position:relative;width:100%;max-width:340px;
+  animation:bnPop .34s cubic-bezier(.2,1.3,.4,1)}
+@keyframes bnPop{from{transform:scale(.88);opacity:0}to{transform:scale(1);opacity:1}}
+.bn-box img{display:block;width:100%;height:auto;border-radius:16px;
+  box-shadow:0 22px 60px rgba(0,0,0,.65);background:var(--asphalt-deep)}
+.bn-x{position:absolute;top:-13px;right:-13px;width:34px;height:34px;
+  border:0;border-radius:50%;cursor:pointer;font-size:19px;line-height:1;
+  background:var(--lane);color:#0D1726;box-shadow:0 5px 14px rgba(0,0,0,.5)}
+.bn-x:active{transform:translateY(1px)}
+.bn-cta{display:block;width:100%;margin-top:14px;border:0;cursor:pointer;
+  font-family:'Bungee';font-size:14px;letter-spacing:.05em;padding:16px;
+  border-radius:12px;color:#1B1128;background:var(--curb);
+  box-shadow:0 4px 0 #B38A20}
+.bn-cta:active{transform:translateY(3px);box-shadow:0 1px 0 #B38A20}
 
 .cr-modal{position:fixed;inset:0;z-index:60;display:flex;align-items:center;
   justify-content:center;padding:20px;background:rgba(12,7,20,.82);
@@ -372,7 +390,7 @@ details[open] summary{color:var(--curb)}
   <header class="top">
     <div>
       <div class="mark">CHICKY <span>ROAD</span></div>
-      <div class="tag">Hop Smart · Survive The Night</div>
+      <div class="tag">Hop Smart · Home For Christmas</div>
     </div>
     <a class="grp" href="https://t.me/krgilersquad" target="_blank" rel="noopener"><b></b>KR GILER SQUAD</a>
   </header>
@@ -380,10 +398,10 @@ details[open] summary{color:var(--curb)}
   <section class="card">
     <div class="stage" id="stage">
       <div id="world"></div>
-      <div class="web l"><svg viewBox="0 0 64 64" aria-hidden="true"><g stroke="rgba(237,230,245,.34)" fill="none" stroke-width="1" stroke-linecap="round"><path d="M0 0 L64 0 M0 0 L0 64 M0 0 L45 45 M0 0 L58 24 M0 0 L24 58"/><path d="M15 0 Q11 11 0 15 M29 0 Q22 22 0 29 M43 0 Q32 32 0 43 M57 0 Q42 42 0 57"/></g></svg></div>
-      <div class="web r"><svg viewBox="0 0 64 64" aria-hidden="true"><g stroke="rgba(237,230,245,.34)" fill="none" stroke-width="1" stroke-linecap="round"><path d="M0 0 L64 0 M0 0 L0 64 M0 0 L45 45 M0 0 L58 24 M0 0 L24 58"/><path d="M15 0 Q11 11 0 15 M29 0 Q22 22 0 29 M43 0 Q32 32 0 43 M57 0 Q42 42 0 57"/></g></svg></div>
-      <div class="bat a"><svg viewBox="0 0 40 24"><g fill="#120C1C"><path class="w" d="M19 12 L4 4 q4 7 -2 9 q7 1 9 5 Z"/><path class="w r" d="M21 12 L36 4 q-4 7 2 9 q-7 1 -9 5 Z"/><ellipse cx="20" cy="12" rx="3.4" ry="4.6"/><path d="M17.4 8.4 l1.1 -3 l1.2 2.4 z M22.6 8.4 l-1.1 -3 l-1.2 2.4 z"/></g></svg></div>
-      <div class="bat b"><svg viewBox="0 0 40 24"><g fill="#120C1C"><path class="w" d="M19 12 L4 4 q4 7 -2 9 q7 1 9 5 Z"/><path class="w r" d="M21 12 L36 4 q-4 7 2 9 q-7 1 -9 5 Z"/><ellipse cx="20" cy="12" rx="3.4" ry="4.6"/><path d="M17.4 8.4 l1.1 -3 l1.2 2.4 z M22.6 8.4 l-1.1 -3 l-1.2 2.4 z"/></g></svg></div>
+      <div class="web l"><svg viewBox="0 0 74 40" aria-hidden="true"><path d="M0 0h74C52 4 34 14 22 26 14 33 7 38 0 40Z" fill="#F2F7FF" opacity=".92"/></svg></div>
+      <div class="web r"><svg viewBox="0 0 74 40" aria-hidden="true"><path d="M0 0h74C52 4 34 14 22 26 14 33 7 38 0 40Z" fill="#F2F7FF" opacity=".92"/></svg></div>
+      <div class="bat a"><svg viewBox="0 0 24 24" aria-hidden="true"><g stroke="#EAF2FF" stroke-width="1.6" stroke-linecap="round"><path d="M12 2v20M3.3 7l17.4 10M20.7 7L3.3 17"/><path d="M12 6l-2.4-2.4M12 6l2.4-2.4M12 18l-2.4 2.4M12 18l2.4 2.4"/><path d="M6.3 8.7l-3.3.3M6.3 8.7l-.3-3.3M17.7 15.3l3.3-.3M17.7 15.3l.3 3.3"/><path d="M6.3 15.3l-3.3-.3M6.3 15.3l-.3 3.3M17.7 8.7l3.3.3M17.7 8.7l.3-3.3"/></g></svg></div>
+      <div class="bat b"><svg viewBox="0 0 24 24" aria-hidden="true"><g stroke="#EAF2FF" stroke-width="1.6" stroke-linecap="round"><path d="M12 2v20M3.3 7l17.4 10M20.7 7L3.3 17"/><path d="M12 6l-2.4-2.4M12 6l2.4-2.4M12 18l-2.4 2.4M12 18l2.4 2.4"/><path d="M6.3 8.7l-3.3.3M6.3 8.7l-.3-3.3M17.7 15.3l3.3-.3M17.7 15.3l.3 3.3"/><path d="M6.3 15.3l-3.3-.3M6.3 15.3l-.3 3.3M17.7 8.7l3.3.3M17.7 8.7l.3-3.3"/></g></svg></div>
       <div class="fog"></div>
       <div class="hud off" id="hud">
         <div class="hud-top">
@@ -514,7 +532,15 @@ details[open] summary{color:var(--curb)}
     </details>
   </section>
 
-  <p class="foot">🎃 CHICKY ROAD · HALLOWEEN · Powered by KGAME99<br>Not affiliated with Telegram</p>
+  <p class="foot">🎄 CHICKY ROAD · CHRISTMAS · Powered by KGAME99<br>Not affiliated with Telegram</p>
+</div>
+
+<div class="bn-wrap" id="bannerWrap" hidden>
+  <div class="bn-box">
+    <button class="bn-x" id="bannerX" aria-label="Close">&times;</button>
+    <img id="bannerImg" alt="Event banner">
+    <button class="bn-cta" id="bannerGo">LET'S GO</button>
+  </div>
 </div>
 
 <div class="cr-modal" id="claimModal" hidden>
@@ -580,6 +606,10 @@ const CONFIG={
   /* Appended to the bot start payload so your webhook can tell a
      real claim from a hand-typed one. Must match the bot side.   */
   claimToken      : '6wyHle3kHY',
+
+  /* Welcome banner shown on every open. Put the image next to
+     index.html. Set to '' to turn the banner off.             */
+  banner          : 'banner.jpg',
 
   /* Testing helper. true = CLAIM appears on both tabs, on every
      row, for anyone. MUST stay false in production.            */
@@ -668,7 +698,9 @@ function boot(auto){
         myRank=$('myRank'), seasonLeft=$('seasonLeft'), mineRow=$('mineRow'), claimModal=$('claimModal'), cmForm=$('cmForm'),
         cmDone=$('cmDone'), cmDoneMsg=$('cmDoneMsg'), cmTitle=$('cmTitle'),
         cmPhone=$('cmPhone'), cmErr=$('cmErr'), cmRow=$('cmRow'),
-        cmYes=$('cmYes'), cmNo=$('cmNo'), cmClose=$('cmClose'), cmOpenBot=$('cmOpenBot');
+        cmYes=$('cmYes'), cmNo=$('cmNo'), cmClose=$('cmClose'), cmOpenBot=$('cmOpenBot'),
+        bannerWrap=$('bannerWrap'), bannerImg=$('bannerImg'),
+        bannerX=$('bannerX'), bannerGo=$('bannerGo');
 
   const missing=Object.entries({flash,readyUI,rNum,rCap,veil,hud,tapzone,cta,liveScore,
     livesRow,seedChip,tf,bonusNum,fill,walker,nextTier,link,copyBtn,lb,myTotal,myRank,
@@ -683,9 +715,9 @@ const CHICK=`<svg viewBox="0 0 64 64" aria-hidden="true" style="width:100%;heigh
 <ellipse cx="32" cy="57" rx="15" ry="3.5" fill="rgba(0,0,0,.3)"/>
 <ellipse cx="32" cy="36" rx="17" ry="16" fill="#FFF8EC"/>
 <ellipse cx="32" cy="26" rx="13" ry="12" fill="#FFFDF7"/>
-<ellipse cx="32" cy="16" rx="15" ry="3.5" fill="#3B2A55"/>
-<path d="M32 -2 L25 15 h14 Z" fill="#4B3570"/>
-<path d="M27 9h10l1 3H26z" fill="#FF8A1F"/>
+<path d="M32 0 C24 2 20 9 19 15 h26 C44 9 40 2 32 0 Z" fill="#E8342F"/>
+<ellipse cx="32" cy="16" rx="14" ry="3.6" fill="#FFFFFF"/>
+<circle cx="45" cy="4" r="4" fill="#FFFFFF"/>
 <circle cx="27" cy="25" r="2.6" fill="#1B2836"/><circle cx="37" cy="25" r="2.6" fill="#1B2836"/>
 <circle cx="27.9" cy="24.2" r="1" fill="#fff"/><circle cx="37.9" cy="24.2" r="1" fill="#fff"/>
 <path d="M32 29l-5 3 5 3 5-3z" fill="#F4A93D"/>
@@ -881,8 +913,8 @@ const RUN_TICKS=3600;          // 60s of *play* — countdowns don't count
 const READY_TICKS=180;         // 3s
 const INVULN_TICKS=60;         // 1s after "GO"
 const HIT=44;                  // forgiving but honest hitbox
-/* hearse black, pumpkin, toxic green, blood red, bone, witch purple */
-const CAR_COLORS=['#2A2436','#E8721C','#7ED957','#C62828','#D9D2E0','#6A4C93'];
+/* sleigh red, pine green, snow white, gold, ice blue, dark green */
+const CAR_COLORS=['#D92B2B','#2E8B4F','#EAF2FF','#F0C24B','#7FB3D5','#1F5F3A'];
 const isMedian=k=>k>0&&k%10===0;
 const laneCenter=k=>GRASS+k*LW+LW/2;
 const stepX=s=>s===0?GRASS/2:laneCenter(s-1);
@@ -915,7 +947,7 @@ function buildLane(k){
   const lane={k,el,cars:[]};
   if(isMedian(k)){
     el.className='strip median';
-    el.innerHTML=`<span class="flag">${k}</span><span class="cp">SAFE GROUND</span>
+    el.innerHTML=`<span class="flag">${k}</span><span class="cp">SAFE SNOW</span>
       <span class="tomb" style="width:17px;height:23px;left:12px;top:96px"></span>
       <span class="tomb" style="width:14px;height:19px;left:46px;top:196px"></span>
       <span class="bush" style="width:20px;height:18px;left:20px;top:152px"></span>`;
@@ -1006,14 +1038,14 @@ function doHop(){
   if(step>maxStep){ maxStep=step; liveScore.innerHTML=maxStep+'<small>Lanes</small>'; }
   chick.classList.remove('idle');
   const p=document.createElement('div');
-  p.className='pop'; p.textContent='🎃';
+  p.className='pop'; p.textContent='🎁';
   p.style.cssText=`left:${stepX(step)+14}px;top:${chickY-42}px`;
   world.appendChild(p); setTimeout(()=>p.remove(),560);
 }
 function die(){
   lives--; renderLives(); TG.hit();
   flash.classList.remove('hit'); void flash.offsetWidth; flash.classList.add('hit');
-  /* pumpkin smash — 10 shards + 2 seeds flung outward */
+  /* gift burst — 10 shards + 2 snowflakes flung outward */
   const s=document.createElement('div');
   s.className='splat';
   s.style.cssText=`left:${stepX(step)}px;top:${chickY}px`;
@@ -1391,6 +1423,20 @@ if(!document.body.dataset.crLinks){
 }
 
 inviteLink=myInviteLink(); link.value=inviteLink;
+/* welcome banner — shown on every open, dismissed by X, button,
+   backdrop tap or Escape. Only appears once the image loads, so a
+   missing file never leaves a blank overlay in the way.        */
+if(CONFIG.banner){
+  bannerImg.onload =()=>{ bannerWrap.hidden=false; };
+  bannerImg.onerror=()=>{ log('banner failed:',CONFIG.banner); };
+  bannerImg.src=CONFIG.banner;
+}
+const closeBanner=()=>{ bannerWrap.hidden=true; };
+bannerX.onclick=closeBanner;
+bannerGo.onclick=closeBanner;
+bannerWrap.addEventListener('click',e=>{ if(e.target===bannerWrap) closeBanner(); });
+addEventListener('keydown',e=>{ if(e.key==='Escape') closeBanner(); });
+
 cmNo.onclick=closeClaim;
 cmClose.onclick=closeClaim;
 cmYes.onclick=submitClaim;
