@@ -484,14 +484,14 @@ details[open] summary{color:var(--curb)}
     <details>
       <summary>Rewards &amp; claiming</summary>
       <div class="body"><ol>
-        <li>Top 1 — <b>30 Credit</b> · Top 2 — <b>20 Credit</b> · Top 3 — <b>10 Credit</b> · Top 4 and 5 — <b>5 Credit</b>.</li>
+        <li>Top 1 — <b>30 KR Coin</b> · Top 2 — <b>20 KR Coin</b> · Top 3 — <b>10 KR Coin</b> · Top 4 and 5 — <b>5 KR Coin</b>.</li>
         <li>On a tie, <b>whoever reached the score first ranks higher</b> — the time each score was set is shown on the board.</li>
         <li>The board settles at <b>00:00 (UTC+8)</b>. Open the <b>YESTERDAY</b> tab and tap <b>CLAIM</b> on your row.</li>
         <li>You will be asked for your <b>Malaysian mobile number (+60)</b>, then sent to <b>@KRminigame_bot</b> to finish the claim.</li>
         <li><b>One claim per player per day.</b></li>
         <li class="warn">Rewards must be claimed <b>the following day</b>. Once that day ends the board is gone and the reward is forfeited.</li>
-        <li>Reward Credit carries a <b>3× turnover requirement</b> and cannot be withdrawn or transferred until it is met.</li>
-        <li>Credit is issued to your kgame99 account, so registration is required first.</li>
+        <li>Spend your KR Coin across our mini games — <b>Lucky Spin</b>, <b>Penalty Kick</b> and <b>Smash Egg</b>.</li>
+        <li>KR Coin is issued to your kgame99 account, so registration is required first.</li>
         <li>Only players who enter through <b>Telegram</b> are ranked.</li>
       </ol></div>
     </details>
@@ -516,7 +516,7 @@ details[open] summary{color:var(--curb)}
   <div class="cr-sheet">
     <div id="cmForm">
       <div class="eyebrow">Claim reward</div>
-      <h3 id="cmTitle">Rank #1 · 30 Credit</h3>
+      <h3 id="cmTitle">Rank #1 · 30 KR Coin</h3>
       <p>Enter the Malaysian mobile number registered with your account. Confirmation is sent to you on Telegram.</p>
       <div class="phone-row" id="cmRow">
         <span class="pfx">+60</span>
@@ -579,7 +579,7 @@ const CONFIG={
   /* Testing helper. true = CLAIM appears on both tabs, on every
      row, for anyone. MUST stay false in production.            */
   claimTestMode   : false,
-  rewards   : [30,20,10,5,5],    // Top 1 … Top 5, in Credit
+  rewards   : [30,20,10,5,5],    // Top 1 … Top 5, in KR Coin
   baseLives : 3,
 
   /* ── DIFFICULTY ───────────────────────────────────────────
@@ -1112,7 +1112,7 @@ function renderBoard(){
     const can=test||(yst&&(API.demo||!CONFIG.claimOwnRowOnly||(r.tg&&r.tg===me)));
     return `<div class="lane-row"><div class="sign ${i<3?'g'+(i+1):''}">${i+1}</div>
       <div class="who"><h4>${r.u}</h4><p>set at ${r.at||'—'}</p></div>
-      <div class="pts"><b>${r.p}</b><i>${rw} CREDIT</i></div>
+      <div class="pts"><b>${r.p}</b><i>${rw} KR COIN</i></div>
       ${(yst||test)?(done
           ? `<button class="claim-btn done" disabled>CLAIMED</button>`
           : `<button class="claim-btn${can?'':' off'}" data-claim="${i+1}"${can?'':' disabled'}>CLAIM${test?' ·TEST':''}</button>`
@@ -1281,7 +1281,7 @@ function openClaim(rank,row,forDate){
   const date=forDate||ystDate();
   if(CLAIMED.has(date)){ TG.alert('You have already claimed this reward.'); return; }
   claimCtx={rank,row,date,credit:CONFIG.rewards[rank-1]||0};
-  cmTitle.textContent='Rank #'+rank+' · '+claimCtx.credit+' Credit';
+  cmTitle.textContent='Rank #'+rank+' · '+claimCtx.credit+' KR Coin';
   cmPhone.value=''; cmErr.textContent=''; cmRow.classList.remove('bad');
   cmYes.disabled=false; cmYes.textContent='YES';
   cmForm.hidden=false; cmDone.hidden=true;
